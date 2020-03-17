@@ -13,7 +13,7 @@ DONT_DELETE_MY_HANDLER(handler_two)
 
 
 int EMSCRIPTEN_KEEPALIVE the_main() {
-    return CONTROL(handler, 1234) + CONTROL(handler_two, 5678);
+    return CONTROL(handler, 0) + CONTROL(handler_two, 0);
 }
 
 #ifndef __EMSCRIPTEN__
