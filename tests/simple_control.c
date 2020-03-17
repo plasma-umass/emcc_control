@@ -1,4 +1,4 @@
-#include "../continuations.h"
+#include "../include/continuations.h"
 #include <stdio.h>
 
 void handler(uint64_t k, uint64_t u) {
@@ -12,14 +12,9 @@ DONT_DELETE_MY_HANDLER(handler)
 DONT_DELETE_MY_HANDLER(handler_two)
 
 
-int EMSCRIPTEN_KEEPALIVE the_main() {
-    return CONTROL(handler, 0) + CONTROL(handler_two, 0);
-}
-
-#ifndef __EMSCRIPTEN__
 int main() {
     INIT_CONTINUATIONS_LIB();
-    printf("%d\n", the_main());
+
+    printf("%llu\n", CONTROL(handler, 0) + CONTROL(handler_two, 0));
     return 0;
 }
-#endif
