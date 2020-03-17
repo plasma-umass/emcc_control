@@ -7,7 +7,12 @@
 #endif
 
 
+#ifdef __EMSCRIPTEN__
 typedef void (*control_handler_fn)(uint64_t, void *);
+#else
+typedef void (*control_handler_fn)(void *,uint64_t, void *);
+#endif
+
 typedef uint64_t k_id;
 
 
@@ -37,9 +42,11 @@ extern void restore(k_id k, uint64_t val, void *vmctx);
 extern uint64_t continuation_copy(k_id k, void *vmctx);
 extern void init_table(void);
 
+#define DEFINE_HANDLER(handler_name, k_name, arg_name) void handler_name(void *__unused_vmctx, k_name, arg_name)
+
 #define DONT_DELETE_MY_HANDLER(handler_name)
 
-#define CONTROL(f, arg) control((control_handler_fn)f, arg, 0)
+#define CONTROL(f, arg) control(f, arg, 0)
 #define RESTORE(k, v) restore(k, v, 0)
 #define CONTINUATION_COPY(k) continuation_copy(k, 0)
 #define INIT_CONTINUATIONS_LIB() init_table()
