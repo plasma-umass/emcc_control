@@ -1,0 +1,3 @@
+#!/bin/bash
+
+clang "$@" ../wasmtime/wasmtime-runtime/conts/conts.c ../wasmtime/wasmtime-runtime/src/continuations.s

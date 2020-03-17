@@ -1,5 +1,5 @@
-#include <emscripten/emscripten.h>
 #include "../continuations.h"
+#include <stdio.h>
 
 void handler(uint64_t k, uint64_t u) {
     RESTORE(k, 42);
@@ -16,6 +16,10 @@ int EMSCRIPTEN_KEEPALIVE the_main() {
     return CONTROL(handler, 1234) + CONTROL(handler_two, 5678);
 }
 
+#ifndef __EMSCRIPTEN__
 int main() {
+    INIT_CONTINUATIONS_LIB();
+    printf("%d\n", the_main());
     return 0;
 }
+#endif
