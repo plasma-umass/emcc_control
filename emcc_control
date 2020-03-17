@@ -6,5 +6,6 @@ emsdk_setup > /dev/null
 set -e
 
 EMCC_ONLY_FORCED_STDLIBS=1 emcc "$1" -g -Os -o "$2.wasm" -s NO_EXIT_RUNTIME=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0
-wasm2wat "$2.wasm" -o "$2.wat"
-python3 sub_primitives.py "$2.wat"
+wasm2wat "$2.wasm" -o "$2"
+rm "$2.wasm"
+python3 sub_primitives.py "$2"

@@ -1,5 +1,5 @@
 #include <emscripten/emscripten.h>
-#include "continuations.h"
+#include "../continuations.h"
 
 void handler(uint64_t k, uint64_t u) {
     RESTORE(k, 42);
