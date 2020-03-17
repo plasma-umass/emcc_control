@@ -1,10 +1,11 @@
 #include "../include/continuations.h"
 #include <stdio.h>
 
-void handler(uint64_t k, uint64_t u) {
+DEFINE_HANDLER(handler, k_id k, void *u) {
     RESTORE(k, 42);
 }
-void handler_two(uint64_t k, uint64_t u) {
+
+DEFINE_HANDLER(handler_two, k_id k, void *u) {
     RESTORE(k, 987);
 }
 

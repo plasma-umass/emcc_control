@@ -24,6 +24,8 @@ uint64_t __prim_continuation_copy(k_id k);
 
 int __prim_inhibit_optimizer();
 
+#define DEFINE_HANDLER(handler_name, k_name, arg_name) void handler_name(k_name, arg_name)
+
 #define DONT_DELETE_MY_HANDLER(handler_name) \
     void EMSCRIPTEN_KEEPALIVE __garbage_please_delete_me_##handler_name() { \
         void (*fptr)(uint64_t, uint64_t) = __prim_inhibit_optimizer() ? handler_name : 0; \
