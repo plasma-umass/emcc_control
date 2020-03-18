@@ -1,11 +1,11 @@
 #include "../include/continuations.h"
 #include <stdio.h>
 
-DEFINE_HANDLER(handler, k_id k, void *u) {
+DEFINE_HANDLER(handler, k_id k, uint64_t u) {
     RESTORE(k, 42);
 }
 
-DEFINE_HANDLER(handler_two, k_id k, void *u) {
+DEFINE_HANDLER(handler_two, k_id k, uint64_t u) {
     RESTORE(k, 987);
 }
 
