@@ -66,7 +66,7 @@ uint64_t gen_next(GeneratorEnv *env) {
 
 // Allocating a generator
 GeneratorEnv *make_generator(gen_fn gf) {
-    GeneratorEnv *env = malloc(sizeof(GeneratorEnv));
+    GeneratorEnv *env = (GeneratorEnv *)malloc(sizeof(GeneratorEnv));
     env->after_yield = lift(gf);
     return env;
 }

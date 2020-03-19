@@ -1,0 +1,5 @@
+#!/bin/bash
+
+clang -O0 -c ../wasmtime/wasmtime-runtime/conts/conts.c -o libs/conts.o
+clang -O0 -c ../wasmtime/wasmtime-runtime/src/continuations.s -o libs/continuations.o
+clang++ -O0 "$@" libs/conts.o libs/continuations.o -o a.out

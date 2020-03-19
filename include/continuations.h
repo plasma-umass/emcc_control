@@ -14,7 +14,9 @@ typedef void (*control_handler_fn)(k_id, uint64_t);
 typedef void (*control_handler_fn)(void *, k_id, uint64_t);
 #endif
 
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef __EMSCRIPTEN__
 
@@ -53,6 +55,11 @@ extern void init_table(void);
 #define CONTINUATION_COPY(k) continuation_copy(k, 0)
 #define INIT_CONTINUATIONS_LIB() init_table()
 
+#endif
+
+
+#ifdef __cplusplus
+}
 #endif
 
 // #define CONTROL(fn_ptr, arg)
