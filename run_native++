@@ -1,0 +1,3 @@
+#!/bin/bash
+
+./clang++_control "$1" && ./a.out
