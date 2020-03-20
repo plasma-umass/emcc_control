@@ -17,6 +17,15 @@ struct ContinuationThunk {
 std::vector<ContinuationThunk *> rest;
 k_id answer_k;
 
+
+void SUCCESS(uint64_t x) {
+    uint64_t *p = (uint64_t *)malloc(sizeof(uint64_t));
+    *p = x;
+    RESTORE(answer_k, (uint64_t)p);
+}
+
+#define FAILURE() RESTORE(answer_k, 0);
+
 DEFINE_HANDLER(choose_handler, k_id k, uint64_t args_ptr_tmp) {
     std::vector<uint64_t> *args = (std::vector<uint64_t> *)args_ptr_tmp;
     
@@ -36,6 +45,10 @@ DEFINE_HANDLER(choose_handler, k_id k, uint64_t args_ptr_tmp) {
 DONT_DELETE_MY_HANDLER(choose_handler)
 
 uint64_t choose_impl(std::vector<uint64_t> *args) {
+    if(args->size() == 0) {
+        FAILURE();
+    }
+
     return CONTROL(choose_handler, (uint64_t)args);
 }
 
@@ -90,13 +103,7 @@ std::vector<uint64_t> *driver(body_fn body) {
     return results;
 }
 
-void SUCCESS(uint64_t x) {
-    uint64_t *p = (uint64_t *)malloc(sizeof(uint64_t));
-    *p = x;
-    RESTORE(answer_k, (uint64_t)p);
-}
 
-#define FAILURE() RESTORE(answer_k, 0);
 
 template<class T> std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
     os << "[";
@@ -212,6 +219,78 @@ void pythag() {
     SUCCESS((uint64_t)(new PythagTriple(a, b, c)));
 }
 
+
+#define N_QUEENS 8
+
+struct Coord {
+    uint64_t x;
+    uint64_t y;
+};
+
+template<class T> struct LList {
+    T value;
+    LList<T> *next;
+};
+
+std::ostream& operator<<(std::ostream& os, const Coord c) {
+    os << "(" << c.x << ", " << c.y << ")";
+    return os;
+}
+
+bool no_attack(uint64_t x, uint64_t y, uint64_t qx, uint64_t qy) {
+    return x != qx && y != qy && abs((int)x - (int)qx) != abs((int)y - (int)qy);
+}
+
+std::vector<uint64_t> *available(uint64_t x, std::vector<Coord *> *qs) {
+    std::vector<uint64_t> *a = new std::vector<uint64_t>();
+    for(uint64_t y = 1; y <= N_QUEENS; y++) {
+        bool is_free = true;
+        for(auto it = qs->begin(); it != qs->end(); ++it) {
+            Coord *q = *it;
+            if(!no_attack(x, y, q->x, q->y)) {
+                is_free = false;
+                break;
+            }
+        }
+
+        if(is_free) {
+            a->push_back(y);
+        }
+    }
+
+    return a;
+}
+
+template<class T> LList<T>* append(T q, LList<T>* qs) {
+    // std::vector<Coord *> *n = new std::vector<Coord *>();
+    // for(auto i = qs->begin(); i != qs->end(); ++i) {
+    //     n->push_back(*i);
+    // }
+    // n->push_back(q);
+    // return n;
+    LList<T> *n = new List<T>();
+    n->value = q;
+    n->next = qs;
+    return n;
+}
+
+void queens() {
+    LList<Coord *> *qs = nullptr;
+
+    for(uint64_t x = 1; x <= N_QUEENS; x++) {
+        uint64_t y = choose_impl(available(x, qs));
+        Coord *q = new Coord();
+        q->x = x;
+        q->y = y;
+        // qs->push_back(q);
+        qs = append(q, qs);
+        // qs = append(q, qs);
+    }
+
+    SUCCESS((uint64_t)qs);
+}
+
+
 DEFINE_HANDLER(the_main, k_id k, uint64_t u) {
     RESTORE(k, (uint64_t)driver((body_fn)u));
 }
@@ -222,6 +301,16 @@ template<class T> void print_and_free(std::vector<T> *v) {
     std::cout << *v << std::endl;
     delete v;
 }
+
+template<class U, class T> std::vector<U> cast_vec(std::vector<T> *v) {
+    std::vector<U> n;
+    for(auto i = v->begin(); i != v->end(); ++i) {
+        n.push_back((U)*i);
+    }
+    delete v;
+    return n;
+}
+
 int main() {
     INIT_CONTINUATIONS_LIB();
 
@@ -229,12 +318,14 @@ int main() {
     print_and_free((std::vector<uint64_t> *)CONTROL(the_main, (uint64_t)even_dice));
 
     std::vector<uint64_t> *trips_raw = (std::vector<uint64_t> *)CONTROL(the_main, (uint64_t)pythag);
-    std::vector<PythagTriple *> trips;
-    for(auto i = trips_raw->begin(); i != trips_raw->end(); ++i) {
-        trips.push_back((PythagTriple *)*i);
-    }
-    delete trips_raw;
-    std::cout << trips << std::endl;
+    std::cout << cast_vec<PythagTriple *>(trips_raw) << std::endl;
+
+    std::vector<uint64_t> *queens_sol_raw = (std::vector<uint64_t> *)CONTROL(the_main, (uint64_t)queens);
+    
+    // print_and_free(queens_sol_raw);
+    int n = queens_sol_raw->size();
+    std::cout << cast_vec<std::vector<Coord *> *>(queens_sol_raw) << std::endl;
+    std::cout << n << std::endl;
 
     return 0;
 }
