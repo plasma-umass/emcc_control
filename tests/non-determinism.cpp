@@ -227,26 +227,30 @@ struct Coord {
     uint64_t y;
 };
 
-template<class T> struct LList {
-    T value;
-    LList<T> *next;
-};
-
 std::ostream& operator<<(std::ostream& os, const Coord c) {
     os << "(" << c.x << ", " << c.y << ")";
     return os;
 }
 
+
+template<class T> struct LList {
+    T value;
+    LList<T> *next;
+};
+
+
+
 bool no_attack(uint64_t x, uint64_t y, uint64_t qx, uint64_t qy) {
     return x != qx && y != qy && abs((int)x - (int)qx) != abs((int)y - (int)qy);
 }
 
-std::vector<uint64_t> *available(uint64_t x, std::vector<Coord *> *qs) {
-    std::vector<uint64_t> *a = new std::vector<uint64_t>();
+std::vector<uint64_t> *available(uint64_t x, LList<Coord *> *qs) {
+    std::vector<uint64_t> *a = new std::vector<uint64_t>(); // this gets deallocated inside choose_impl()
     for(uint64_t y = 1; y <= N_QUEENS; y++) {
         bool is_free = true;
-        for(auto it = qs->begin(); it != qs->end(); ++it) {
-            Coord *q = *it;
+
+        for(LList<Coord *> *it = qs; it != nullptr; it = it->next) {
+            Coord *q = it->value;
             if(!no_attack(x, y, q->x, q->y)) {
                 is_free = false;
                 break;
@@ -262,13 +266,7 @@ std::vector<uint64_t> *available(uint64_t x, std::vector<Coord *> *qs) {
 }
 
 template<class T> LList<T>* append(T q, LList<T>* qs) {
-    // std::vector<Coord *> *n = new std::vector<Coord *>();
-    // for(auto i = qs->begin(); i != qs->end(); ++i) {
-    //     n->push_back(*i);
-    // }
-    // n->push_back(q);
-    // return n;
-    LList<T> *n = new List<T>();
+    LList<T> *n = new LList<T>();
     n->value = q;
     n->next = qs;
     return n;
@@ -282,12 +280,15 @@ void queens() {
         Coord *q = new Coord();
         q->x = x;
         q->y = y;
-        // qs->push_back(q);
         qs = append(q, qs);
-        // qs = append(q, qs);
     }
 
-    SUCCESS((uint64_t)qs);
+    std::vector<Coord *> *qs_v = new std::vector<Coord *>();
+    for(LList<Coord *> *it = qs; it != nullptr; it = it->next) {
+        qs_v->push_back(it->value);
+    }
+
+    SUCCESS((uint64_t)qs_v);
 }
 
 
