@@ -7,15 +7,16 @@
 #include <map>
 #include <iostream>
 
-
 std::map<uint64_t, double> *count_probs(std::vector<uint64_t> *v) {
     auto m = new std::map<uint64_t, double>();
     for(auto it = v->begin(); it != v->end(); ++it) {
         auto f = m->find(*it);
         if(f == m->end()) {
             m->insert(std::pair<uint64_t, double>(*it, 1.0 / v->size()));
+            // m->insert(std::pair<uint64_t, double>(*it, 1.0));
         } else {
             f->second += 1.0 / v->size();
+            // f->second += 1.0;
         }
     }
     return m;
@@ -39,6 +40,28 @@ void SUCCESS(uint64_t x) {
 }
 
 #define FAILURE() RESTORE(answer_k, 0);
+
+DEFINE_HANDLER(trials_handler, k_id k, uint64_t n) {    
+
+    for(int i = 1; i < n; i++) {
+        ContinuationThunk *t = new ContinuationThunk();
+        t->continuation = CONTINUATION_COPY(k);
+        t->value = 0;
+        t->ans_cont = CONTINUATION_COPY(answer_k);
+        rest.push_back(t);
+    }
+    RESTORE(k, 0);
+}
+DONT_DELETE_MY_HANDLER(trials_handler)
+
+void trials(uint64_t n) {
+    if(n == 0) {
+        FAILURE();
+    } else if(n == 1) {
+        return; // small optimization
+    }
+    CONTROL(trials_handler, n);
+}
 
 DEFINE_HANDLER(choose_handler, k_id k, uint64_t args_ptr_tmp) {
     std::vector<uint64_t> *args = (std::vector<uint64_t> *)args_ptr_tmp;
@@ -133,13 +156,6 @@ template<class K, class V> std::ostream& operator<<(std::ostream& os, const std:
         }
     }
     os << "}";
-    // for(int i = 0; i < v.size(); i++) {
-    //     os << v[i];
-    //     if(i != v.size() - 1) {
-    //         os << ", ";
-    //     }
-    // }
-    // os << "]";
     return os;
 }
 
@@ -155,9 +171,11 @@ template<class T> std::ostream& operator<<(std::ostream& os, const std::vector<T
     return os;
 }
 
+// typedef template<class T> uint64_t (*sample_fn)(T v);
 
-k_id get_answer_k() {
-    return answer_k;
+template<class T> uint64_t sample(uint64_t n, T v, uint64_t (*f)(T)) {
+    trials(n);
+    return f(v);
 }
 
 // *************** EXAMPLE USAGE *******************
@@ -166,16 +184,30 @@ uint64_t F() {
     return CHOOSE(1, 2, 3, 4, 5, 6);
 }
 
+uint64_t geom(double p) {
+    uint64_t g = 1;
+    while(true) {
+        double r = (double)rand() / RAND_MAX;
+        if(r < p) {
+            break;
+        }
+        g++;
+    }
+    return g;
+}
+
 void even_dice() {
     uint64_t x = F();
     uint64_t y = F();
     if((x+y)%2 != 0) {
         FAILURE();
     }
-    SUCCESS(x + y);
+
+    uint64_t g_05 = sample(100, 0.5, geom);
+    uint64_t g_08 = sample(100, 0.8, geom);
+    
+    SUCCESS(x + y + g_05 + g_08);
 }
-
-
 
 
 DEFINE_HANDLER(the_main, k_id k, uint64_t u) {
