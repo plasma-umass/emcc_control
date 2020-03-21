@@ -196,7 +196,7 @@ uint64_t geom(double p) {
     return g;
 }
 
-void even_dice() {
+void even_dice_plus_geom() {
     uint64_t x = F();
     uint64_t y = F();
     if((x+y)%2 != 0) {
@@ -225,18 +225,8 @@ template<class T> void print_and_free(T *v) {
 int main() {
     INIT_CONTINUATIONS_LIB();
 
-    // print_and_free((std::vector<uint64_t> *)CONTROL(the_main, (uint64_t)mult_ex));
-    print_and_free((std::map<uint64_t, double> *)CONTROL(the_main, (uint64_t)even_dice));
+    print_and_free((std::map<uint64_t, double> *)CONTROL(the_main, (uint64_t)even_dice_plus_geom));
 
-    // std::vector<uint64_t> *trips_raw = (std::vector<uint64_t> *)CONTROL(the_main, (uint64_t)pythag);
-    // std::cout << cast_vec<PythagTriple *>(trips_raw) << std::endl;
-
-    // std::vector<uint64_t> *queens_sol_raw = (std::vector<uint64_t> *)CONTROL(the_main, (uint64_t)queens);
-    
-    // // print_and_free(queens_sol_raw);
-    // int n = queens_sol_raw->size();
-    // std::cout << cast_vec<std::vector<Coord *> *>(queens_sol_raw) << std::endl;
-    // std::cout << n << std::endl;
 
     return 0;
 }
