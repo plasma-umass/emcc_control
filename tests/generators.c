@@ -12,55 +12,48 @@ typedef struct {
 typedef void (*gen_fn)(GeneratorEnv *);
 
 // Helpers for lifting a function up to a continuation
-k_id _after_lift;
-gen_fn _to_lift;
-
-DEFINE_HANDLER(_save_k_restore, k_id k, uint64_t arg) {
-    RESTORE(_after_lift, k);
+// Given a function f with 1 parameter, lift(f) returns a continuation id k
+// such that restore(k, x) executes f(x).
+void _return_lift_result(k_id k, uint64_t _after_lift_kid) {
+    restore(_after_lift_kid, k);
 }
-DONT_DELETE_MY_HANDLER(_save_k_restore)
 
-DEFINE_HANDLER(_lift_handler, k_id k, uint64_t arg) {
-    _after_lift = k;
-    gen_fn tmp = _to_lift;
+void _lift_handler(k_id k, uint64_t f_ptr) {
+    gen_fn f = (gen_fn)f_ptr;
     
-    tmp((GeneratorEnv *)CONTROL(_save_k_restore, 0));
+    f((GeneratorEnv *)control(_return_lift_result, k));
 }
-DONT_DELETE_MY_HANDLER(_lift_handler)
 
 k_id lift(gen_fn f) {
-    _to_lift = f;
-    return CONTROL(_lift_handler, 0);
+    return control(_lift_handler, (uint64_t)f);
 }
 
 
 
 // Yielding implementation
 
-DEFINE_HANDLER(yield_handler, k_id rest, uint64_t env_tmp) {
+void yield_handler(k_id rest, uint64_t env_tmp) {
     GeneratorEnv *env = (GeneratorEnv *)env_tmp;
     env->after_yield = rest;
-    RESTORE(env->after_next, env->value);
+    restore(env->after_next, env->value);
 }
-DONT_DELETE_MY_HANDLER(yield_handler)
 
 void gen_yield(uint64_t v, GeneratorEnv *env) {
     env->value = v;
-    CONTROL(yield_handler, (uint64_t)env);
+    control(yield_handler, (uint64_t)env);
 }
 
 
 // Next implementation
 
-DEFINE_HANDLER(next_handler, k_id k, uint64_t env_tmp) {
+void next_handler(k_id k, uint64_t env_tmp) {
     GeneratorEnv *env = (GeneratorEnv *)env_tmp;
     env->after_next = k;
-    RESTORE(env->after_yield, (uint64_t)env);
+    restore(env->after_yield, (uint64_t)env);
 }
-DONT_DELETE_MY_HANDLER(next_handler)
 
 uint64_t gen_next(GeneratorEnv *env) {
-    return CONTROL(next_handler, (uint64_t)env);
+    return control(next_handler, (uint64_t)env);
 }
 
 
@@ -84,8 +77,6 @@ void example_generator(GeneratorEnv *env) {
 }
 
 int main() {
-    INIT_CONTINUATIONS_LIB();
-
     GeneratorEnv *env = make_generator(example_generator);
 
     for(int i = 0; i < 100; i++) {
@@ -94,3 +85,9 @@ int main() {
 
     return 0;
 }
+
+
+DONT_DELETE_MY_HANDLER(_return_lift_result)
+DONT_DELETE_MY_HANDLER(_lift_handler)
+DONT_DELETE_MY_HANDLER(yield_handler)
+DONT_DELETE_MY_HANDLER(next_handler)
