@@ -21,26 +21,26 @@ k_id answer_k;
 void SUCCESS(uint64_t x) {
     uint64_t *p = (uint64_t *)malloc(sizeof(uint64_t));
     *p = x;
-    RESTORE(answer_k, (uint64_t)p);
+    restore(answer_k, (uint64_t)p);
 }
 
-#define FAILURE() RESTORE(answer_k, 0);
+#define FAILURE() restore(answer_k, 0);
 
-DEFINE_HANDLER(choose_handler, k_id k, uint64_t args_ptr_tmp) {
+void choose_handler(k_id k, uint64_t args_ptr_tmp) {
     std::vector<uint64_t> *args = (std::vector<uint64_t> *)args_ptr_tmp;
     
     for(int i = 1; i < args->size(); i++) {
         ContinuationThunk *t = new ContinuationThunk();
-        t->continuation = CONTINUATION_COPY(k);
+        t->continuation = continuation_copy(k);
         t->value = args->at(i);
-        t->ans_cont = CONTINUATION_COPY(answer_k);
+        t->ans_cont = continuation_copy(answer_k);
         rest.push_back(t);
     }
 
     uint64_t v = args->at(0);
     delete args;
     
-    RESTORE(k, v);
+    restore(k, v);
 }
 DONT_DELETE_MY_HANDLER(choose_handler)
 
@@ -49,7 +49,7 @@ uint64_t choose_impl(std::vector<uint64_t> *args) {
         FAILURE();
     }
 
-    return CONTROL(choose_handler, (uint64_t)args);
+    return control(choose_handler, (uint64_t)args);
 }
 
 std::vector<uint64_t> *copy_array_vec(uint64_t *p, int n) {
@@ -71,7 +71,7 @@ std::vector<uint64_t> *copy_array_vec(uint64_t *p, int n) {
 typedef void (*body_fn)();
 
 
-DEFINE_HANDLER(driver_handler, k_id k, uint64_t body_func_tmp) {
+void driver_handler(k_id k, uint64_t body_func_tmp) {
     body_fn body = (body_fn)body_func_tmp;
     answer_k = k;
     // body(k);
@@ -84,7 +84,7 @@ DONT_DELETE_MY_HANDLER(driver_handler)
 std::vector<uint64_t> *driver(body_fn body) {
     std::vector<uint64_t> *results = new std::vector<uint64_t>();
 
-    uint64_t *vp = (uint64_t *)CONTROL(driver_handler, (uint64_t)body);
+    uint64_t *vp = (uint64_t *)control(driver_handler, (uint64_t)body);
     if(vp) {
         results->push_back(*vp);
         delete vp;
@@ -98,7 +98,7 @@ std::vector<uint64_t> *driver(body_fn body) {
         answer_k = t->ans_cont;
 
         delete t;
-        RESTORE(k, v);
+        restore(k, v);
     }
     return results;
 }
@@ -293,8 +293,8 @@ void queens() {
 }
 
 
-DEFINE_HANDLER(the_main, k_id k, uint64_t u) {
-    RESTORE(k, (uint64_t)driver((body_fn)u));
+void the_main(k_id k, uint64_t u) {
+    restore(k, (uint64_t)driver((body_fn)u));
 }
 DONT_DELETE_MY_HANDLER(the_main)
 
@@ -314,15 +314,13 @@ template<class U, class T> std::vector<U> cast_vec(std::vector<T> *v) {
 }
 
 int main() {
-    INIT_CONTINUATIONS_LIB();
+    print_and_free((std::vector<uint64_t> *)control(the_main, (uint64_t)mult_ex));
+    print_and_free((std::vector<uint64_t> *)control(the_main, (uint64_t)even_dice));
 
-    print_and_free((std::vector<uint64_t> *)CONTROL(the_main, (uint64_t)mult_ex));
-    print_and_free((std::vector<uint64_t> *)CONTROL(the_main, (uint64_t)even_dice));
-
-    std::vector<uint64_t> *trips_raw = (std::vector<uint64_t> *)CONTROL(the_main, (uint64_t)pythag);
+    std::vector<uint64_t> *trips_raw = (std::vector<uint64_t> *)control(the_main, (uint64_t)pythag);
     std::cout << cast_vec<PythagTriple *>(trips_raw) << std::endl;
 
-    std::vector<uint64_t> *queens_sol_raw = (std::vector<uint64_t> *)CONTROL(the_main, (uint64_t)queens);
+    std::vector<uint64_t> *queens_sol_raw = (std::vector<uint64_t> *)control(the_main, (uint64_t)queens);
     
     // print_and_free(queens_sol_raw);
     int n = queens_sol_raw->size();
