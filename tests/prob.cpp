@@ -28,15 +28,12 @@ struct ContinuationThunk {
     k_id ans_cont;
 };
 
-
 std::vector<ContinuationThunk *> rest;
 k_id answer_k;
 
 
-void SUCCESS(uint64_t x) {
-    uint64_t *p = (uint64_t *)malloc(sizeof(uint64_t));
-    *p = x;
-    restore(answer_k, (uint64_t)p);
+void success(uint64_t x) {
+    restore(answer_k, x);
 }
 
 #define FAILURE() restore(answer_k, 0);
@@ -46,7 +43,7 @@ void trials_handler(k_id k, uint64_t n) {
         ContinuationThunk *t = new ContinuationThunk();
         t->continuation = continuation_copy(k);
         t->value = 0;
-        t->ans_cont = continuation_copy(answer_k);
+        // t->ans_cont = continuation_copy(answer_k);
         rest.push_back(t);
     }
     restore(k, 0);
@@ -65,16 +62,16 @@ void trials(uint64_t n) {
 void choose_handler(k_id k, uint64_t args_ptr_tmp) {
     std::vector<uint64_t> *args = (std::vector<uint64_t> *)args_ptr_tmp;
     
-    for(int i = 1; i < args->size(); i++) {
+    for(auto it = std::next(args->begin()); it != args->end(); ++it) {
         ContinuationThunk *t = new ContinuationThunk();
         t->continuation = continuation_copy(k);
-        t->value = args->at(i);
-        t->ans_cont = continuation_copy(answer_k);
+        t->value = *it;
+        // t->ans_cont = continuation_copy(answer_k);
         rest.push_back(t);
     }
 
     uint64_t v = args->at(0);
-    delete args;
+    // delete args;
     
     restore(k, v);
 }
@@ -104,7 +101,7 @@ std::vector<uint64_t> *copy_array_vec(uint64_t *p, int n) {
     }())
 
 
-typedef void (*body_fn)();
+typedef uint64_t (*body_fn)();
 
 
 void driver_handler(k_id k, uint64_t body_func_tmp) {
@@ -120,11 +117,12 @@ DONT_DELETE_MY_HANDLER(driver_handler)
 std::map<uint64_t, double> *driver(body_fn body) {
     std::vector<uint64_t> *results = new std::vector<uint64_t>();
 
-    uint64_t *vp = (uint64_t *)control(driver_handler, (uint64_t)body);
-    if(vp) {
-        results->push_back(*vp);
-        delete vp;
-    }
+    // uint64_t v = control(driver_handler, (uint64_t)body);
+    results->push_back(body());
+    // if(vp) {
+    //     results->push_back(*vp);
+    //     delete vp;
+    // }
 
     if(rest.size() > 0) {
         ContinuationThunk *t = rest.back();
@@ -195,17 +193,19 @@ uint64_t geom(double p) {
     return g;
 }
 
-void even_dice_plus_geom() {
-    uint64_t x = F();
-    uint64_t y = F();
-    if((x+y)%2 != 0) {
-        FAILURE();
-    }
+uint64_t even_dice_plus_geom() {
+    auto *d6 = new std::vector<uint64_t> {1, 2, 3, 4, 5, 6};
+    // uint64_t x = choose_impl(d6);
+    // uint64_t y = choose_impl(d6);
+    // if((x+y)%2 != 0) {
+    //     FAILURE();
+    // }
 
-    uint64_t g_05 = sample(100, 0.5, geom);
-    uint64_t g_08 = sample(100, 0.8, geom);
+    // uint64_t g_05 = sample(100, 0.5, geom);
+    // uint64_t g_08 = sample(100, 0.8, geom);
     
-    SUCCESS(x + y + g_05 + g_08);
+    // success(x + y + g_05 + g_08);
+    return choose_impl(d6) + choose_impl(d6);
 }
 
 
