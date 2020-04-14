@@ -25,49 +25,17 @@ std::map<uint64_t, double> *count_probs(std::vector<uint64_t> *v) {
 struct ContinuationThunk {
     k_id continuation;
     uint64_t value;
-    k_id ans_cont;
 };
 
 std::vector<ContinuationThunk *> rest;
-k_id answer_k;
 
 
-void success(uint64_t x) {
-    restore(answer_k, x);
-}
-
-#define FAILURE() restore(answer_k, 0);
-
-void trials_handler(k_id k, uint64_t n) {    
-    for(int i = 1; i < n; i++) {
-        ContinuationThunk *t = new ContinuationThunk();
-        t->continuation = continuation_copy(k);
-        t->value = 0;
-        // t->ans_cont = continuation_copy(answer_k);
-        rest.push_back(t);
-    }
-    restore(k, 0);
-}
-DONT_DELETE_MY_HANDLER(trials_handler)
-
-void trials(uint64_t n) {
-    if(n == 0) {
-        FAILURE();
-    } else if(n == 1) {
-        return; // small optimization
-    }
-    control(trials_handler, n);
-}
 
 void choose_handler(k_id k, uint64_t args_ptr_tmp) {
     std::vector<uint64_t> *args = (std::vector<uint64_t> *)args_ptr_tmp;
     
     for(auto it = std::next(args->begin()); it != args->end(); ++it) {
-        ContinuationThunk *t = new ContinuationThunk();
-        t->continuation = continuation_copy(k);
-        t->value = *it;
-        // t->ans_cont = continuation_copy(answer_k);
-        rest.push_back(t);
+        rest.push_back(new ContinuationThunk {.continuation = continuation_copy(k), .value = *it});
     }
 
     uint64_t v = args->at(0);
@@ -78,10 +46,6 @@ void choose_handler(k_id k, uint64_t args_ptr_tmp) {
 DONT_DELETE_MY_HANDLER(choose_handler)
 
 uint64_t choose_impl(std::vector<uint64_t> *args) {
-    if(args->size() == 0) {
-        FAILURE();
-    }
-
     return control(choose_handler, (uint64_t)args);
 }
 
@@ -104,40 +68,17 @@ std::vector<uint64_t> *copy_array_vec(uint64_t *p, int n) {
 typedef uint64_t (*body_fn)();
 
 
-void driver_handler(k_id k, uint64_t body_func_tmp) {
-    body_fn body = (body_fn)body_func_tmp;
-    answer_k = k;
-    // body(k);
-    body();
-}
-DONT_DELETE_MY_HANDLER(driver_handler)
-
-
-
-std::map<uint64_t, double> *driver(body_fn body) {
+std::map<uint64_t, double> *driver(uint64_t (*body)()) {
     std::vector<uint64_t> *results = new std::vector<uint64_t>();
-
-    // uint64_t v = control(driver_handler, (uint64_t)body);
     results->push_back(body());
-    // if(vp) {
-    //     results->push_back(*vp);
-    //     delete vp;
-    // }
 
     if(rest.size() > 0) {
-        ContinuationThunk *t = rest.back();
-        rest.pop_back();
-        k_id k = t->continuation;
-        uint64_t v = t->value;
-        answer_k = t->ans_cont;
-
-        delete t;
-        restore(k, v);
+        ContinuationThunk *t = rest.back(); rest.pop_back();
+        restore(t->continuation, t->value);
     }
 
-    auto results_prob = count_probs(results);
-    delete results;
-    return results_prob;
+    auto results_distr = count_probs(results);
+    return results_distr;
 }
 
 
@@ -166,13 +107,6 @@ template<class T> std::ostream& operator<<(std::ostream& os, const std::vector<T
     }
     os << "]";
     return os;
-}
-
-// typedef template<class T> uint64_t (*sample_fn)(T v);
-
-template<class T> uint64_t sample(uint64_t n, T v, uint64_t (*f)(T)) {
-    trials(n);
-    return f(v);
 }
 
 // *************** EXAMPLE USAGE *******************
