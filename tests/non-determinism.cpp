@@ -275,14 +275,15 @@ template<class T> LList<T>* append(T q, LList<T>* qs) {
 void queens() {
     LList<Coord *> *qs = nullptr;
 
-    for(uint64_t x = 1; x <= N_QUEENS; x++) {
-        uint64_t y = choose_impl(available(x, qs));
+    for(uint64_t x = 1; x <= N_QUEENS; x++) { // need to place a queen in each x coordinate
+        uint64_t y = choose_impl(available(x, qs)); // non deterministically choose an available y coordinate
         Coord *q = new Coord();
         q->x = x;
         q->y = y;
-        qs = append(q, qs);
+        qs = append(q, qs); // place the queen
     }
 
+    // stupid shit to convert linked list to vector
     std::vector<Coord *> *qs_v = new std::vector<Coord *>();
     for(LList<Coord *> *it = qs; it != nullptr; it = it->next) {
         qs_v->push_back(it->value);

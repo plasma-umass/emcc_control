@@ -7,9 +7,9 @@ typedef struct {
     k_id after_next;
     k_id after_yield;
     uint64_t value;
-} GeneratorEnv;
+} Generator;
 
-typedef void (*gen_fn)(GeneratorEnv *);
+typedef void (*gen_fn)(Generator *);
 
 // Helpers for lifting a function up to a continuation
 // Given a function f with 1 parameter, lift(f) returns a continuation id k
@@ -21,7 +21,7 @@ void _return_lift_result(k_id k, uint64_t _after_lift_kid) {
 void _lift_handler(k_id k, uint64_t f_ptr) {
     gen_fn f = (gen_fn)f_ptr;
     
-    f((GeneratorEnv *)control(_return_lift_result, k));
+    f((Generator *)control(_return_lift_result, k));
 }
 
 k_id lift(gen_fn f) {
@@ -30,59 +30,51 @@ k_id lift(gen_fn f) {
 
 
 
-// Yielding implementation
-
-void yield_handler(k_id rest, uint64_t env_tmp) {
-    GeneratorEnv *env = (GeneratorEnv *)env_tmp;
-    env->after_yield = rest;
-    restore(env->after_next, env->value);
+// Allocating a generator
+Generator *make_generator(gen_fn gf) {
+    Generator *g = (Generator *)malloc(sizeof(Generator));
+    g->after_yield = lift(gf);
+    return g;
 }
 
-void gen_yield(uint64_t v, GeneratorEnv *env) {
-    env->value = v;
-    control(yield_handler, (uint64_t)env);
+
+// Yielding implementation
+void yield_handler(k_id k, Generator *g) {
+    g->after_yield = k;
+    restore(g->after_next, g->value);
+}
+void gen_yield(uint64_t v, Generator *g) {
+    g->value = v;
+    control(yield_handler, g);
 }
 
 
 // Next implementation
-
-void next_handler(k_id k, uint64_t env_tmp) {
-    GeneratorEnv *env = (GeneratorEnv *)env_tmp;
-    env->after_next = k;
-    restore(env->after_yield, (uint64_t)env);
+void next_handler(k_id k, Generator *g) {
+    g->after_next = k;
+    restore(g->after_yield, 0);
 }
 
-uint64_t gen_next(GeneratorEnv *env) {
-    return control(next_handler, (uint64_t)env);
+uint64_t gen_next(Generator *g) {
+    return control(next_handler, g);
 }
 
-
-// Allocating a generator
-GeneratorEnv *make_generator(gen_fn gf) {
-    GeneratorEnv *env = (GeneratorEnv *)malloc(sizeof(GeneratorEnv));
-    env->after_yield = lift(gf);
-    return env;
-}
 
 
 
 // **************** Example generator use *****************
 
-void example_generator(GeneratorEnv *env) {
+void example_generator(Generator *g) {
     uint64_t i = 0;
     while(1) {
-        gen_yield(i, env);
-        i++;
+        gen_yield(i++, g);
     }
 }
-
 int main() {
-    GeneratorEnv *env = make_generator(example_generator);
-
-    for(int i = 0; i < 100; i++) {
-        printf("%llu\n", gen_next(env));
+    Generator *g = make_generator(example_generator);
+    for(int i = 0; i < 10; i++) {
+        printf("%llu\n", gen_next(g));
     }
-
     return 0;
 }
 
