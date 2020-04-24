@@ -12,6 +12,7 @@ extern "C" {
 uint64_t __prim_control(uint64_t arg, control_handler_fn fn_ptr);
 void __prim_restore(k_id k, uint64_t val);
 uint64_t __prim_continuation_copy(k_id k);
+void __prim_continuation_delete(k_id k);
 
 int __prim_inhibit_optimizer();
 
@@ -24,6 +25,7 @@ int __prim_inhibit_optimizer();
 #define control(f, arg) __prim_control(arg, f)
 #define restore(k, v) __prim_restore(k, v)
 #define continuation_copy(k) __prim_continuation_copy(k)
+#define continuation_delete(k) __prim_continuation_delete(k)
 
 
 

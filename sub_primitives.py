@@ -8,9 +8,9 @@ with open(sys.argv[1], 'r') as wat_input_f:
 wat = re.compile(r'\(elem \(;\d+;\) \(i32\.const 1\) func ').sub(r'(elem (i32.const 1) ', wat)
 
 # Extract the function table
-func_table_search = re.compile(r'\(elem \(i32\.const 1\) ([^\)]*)\)').search(wat)
+func_table_search = re.compile(r'\(elem \(;0;\) \(i32\.const 1\) ([^\)]*)\)').search(wat)
 if func_table_search is not None:
-    func_table_str = re.compile(r'\(elem \(i32\.const 1\) ([^\)]*)\)').search(wat).group(1)
+    func_table_str = re.compile(r'\(elem \(;0;\) \(i32\.const 1\) ([^\)]*)\)').search(wat).group(1)
     func_table = func_table_str.split()
 else:
     func_table = []
@@ -20,6 +20,7 @@ def replace_control(match):
     func_name = func_table[int(match.group(1)) - 1]
     return f"control {func_name}"
 
+# print(func_table)
 wat = re.compile(r'i32\.const (\d+)\s+call \$__prim_control').sub(replace_control, wat)
 
 # Replace $__prim_restore calls

@@ -36,6 +36,10 @@ Generator *make_generator(gen_fn gf) {
     g->after_yield = lift(gf);
     return g;
 }
+void free_generator(Generator *g) {
+    // continuation_delete(g->after_yield);
+    free(g);
+}
 
 
 // Yielding implementation
@@ -75,6 +79,7 @@ int main() {
     for(int i = 0; i < 10; i++) {
         printf("%llu\n", gen_next(g));
     }
+    free_generator(g);
     return 0;
 }
 
