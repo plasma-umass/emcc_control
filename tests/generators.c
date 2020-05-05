@@ -1,3 +1,4 @@
+#include <emscripten/emscripten.h>
 #include "../include/continuations.h"
 #include <stdio.h>
 #include <stdint.h>
@@ -37,7 +38,7 @@ Generator *make_generator(gen_fn gf) {
     return g;
 }
 void free_generator(Generator *g) {
-    // continuation_delete(g->after_yield);
+    continuation_delete(g->after_yield);
     free(g);
 }
 

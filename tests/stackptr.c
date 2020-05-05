@@ -1,10 +1,11 @@
+#include <emscripten/emscripten.h>
 #include "../include/continuations.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 
-void print_stuff(char c, int x) {
-    printf("%c: %d\n", c, x);
+void print_stuff(char *c, int x) {
+    printf("%s%d\n", c, x);
     return;
 }
 
@@ -35,18 +36,19 @@ void fork() {
     control(fork_handler, 0);
 }
 
-int make_int() {
-    return rand() % 10;
-}
 
 void the_main() {
-    int x = make_int();
-    // int *p = &x;
+    int x = rand() % 10;
+    int *xp = &x;
 
-    print_stuff('a', x);
+    print_stuff("initial x = ", x);
+    print_stuff("x address = ", (int)xp);
+
+    fork();
+
     x++;
-    // fork();
-    print_stuff('b', x);
+    
+    print_stuff("new x = ", x);
 }
 
 int driver(k_id k, uint64_t _arg) {
@@ -83,4 +85,3 @@ DONT_DELETE_MY_HANDLER(the_main)
 
 DONT_DELETE_MY_HANDLER(driver)
 DONT_DELETE_MY_HANDLER(main)
-DONT_DELETE_MY_HANDLER(make_int)

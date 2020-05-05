@@ -45,7 +45,7 @@ wat = re.compile(r'\(import "wasi_snapshot_preview1"').sub('(import "wasi_unstab
 
 # Make sure there are no calls to $__prim_control left
 if '$__prim_control' in wat:
-    print("Error: indirect control detect. This is not yet supported.", file=sys.stderr)
+    print("Error: indirect control detected. This is not yet supported.", file=sys.stderr)
     exit(1)
 
 with open(sys.argv[1], 'w') as wat_output_f:
