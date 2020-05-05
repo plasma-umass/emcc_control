@@ -1,0 +1,1 @@
+;; local.0 = k_id k
