@@ -65,6 +65,7 @@ void driver(k_id k, uint64_t _arg) {
 
 
 int main() {
+    initialize_continuations();
     // handler1(0, 0);
     srand(1234);
     stack = malloc(sizeof(k_id) * 10);
