@@ -15,18 +15,20 @@ if func_table_search is not None:
 else:
     func_table = []
 
+# print(func_table)
+
 # Replace $__prim_control calls
 def replace_control(match):
     func_name = func_table[int(match.group(1)) - 1]
     return f"control {func_name}"
-
-# print(func_table)
 wat = re.compile(r'i32\.const (\d+)\s+call \$__prim_control').sub(replace_control, wat)
 
 # Replace $__prim_restore calls
 wat = re.compile(r'call \$__prim_restore').sub('restore', wat)
 # Replace $__prim_continuation_copy calls
 wat = re.compile(r'call \$__prim_continuation_copy').sub('continuation_copy', wat)
+# Replace $__prim_continuation_delete calls
+wat = re.compile(r'call \$__prim_continuation_delete').sub('drop', wat) #TODO: uncomment this: .sub('continuation_delete', wat)
 
 # Delete the stub imports for the primitives
 def delete_import(wat, imp):
@@ -35,6 +37,7 @@ def delete_import(wat, imp):
 wat = delete_import(wat, '__prim_control')
 wat = delete_import(wat, '__prim_restore')
 wat = delete_import(wat, '__prim_continuation_copy')
+wat = delete_import(wat, '__prim_continuation_delete')
 wat = delete_import(wat, '__prim_inhibit_optimizer')
 
 # Delete calls to $__prim_inhibit_optimizer
