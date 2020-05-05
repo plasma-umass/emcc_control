@@ -51,7 +51,7 @@ void the_main() {
     print_stuff("new x = ", x);
 }
 
-int driver(k_id k, uint64_t _arg) {
+void driver(k_id k, uint64_t _arg) {
     
     the_main();
     if(num_k > 0) {

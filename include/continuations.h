@@ -25,11 +25,13 @@ void __prim_hook_delete_post();
 void __noinline_hook_control(k_id k, uint64_t arg);
 void __noinline_hook_restore(k_id k, uint64_t v);
 void __noinline_hook_copy(k_id k, k_id new_k);
-void __noninline_hook_delete(k_id k);
+void __noinline_hook_delete(k_id k);
 
 
 // This is replaced with nops
 int __prim_inhibit_optimizer();
+
+void __shim_handler(k_id k, uint64_t arg);
 
 #define DONT_DELETE_MY_HANDLER(handler_name) \
     void EMSCRIPTEN_KEEPALIVE __garbage_please_delete_me_##handler_name() { \
@@ -80,7 +82,7 @@ void EMSCRIPTEN_KEEPALIVE __hook_delete(k_id k) {
 
 void __shim_continuation_delete(k_id k) {
     __prim_continuation_delete(k);
-    __noninline_hook_delete(k);
+    __noinline_hook_delete(k);
 }
 
 #define control(f, arg) __shim_control(f, arg)

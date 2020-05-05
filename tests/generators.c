@@ -44,7 +44,8 @@ void free_generator(Generator *g) {
 
 
 // Yielding implementation
-void yield_handler(k_id k, Generator *g) {
+void yield_handler(k_id k, uint64_t gp) {
+    Generator *g = (Generator *)gp;
     g->after_yield = k;
     restore(g->after_next, g->value);
 }
@@ -55,7 +56,8 @@ void gen_yield(uint64_t v, Generator *g) {
 
 
 // Next implementation
-void next_handler(k_id k, Generator *g) {
+void next_handler(k_id k, uint64_t gp) {
+    Generator *g = (Generator *)gp;
     g->after_next = k;
     restore(g->after_yield, 0);
 }
