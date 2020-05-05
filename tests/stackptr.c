@@ -28,7 +28,9 @@ k_id popk() {
 }
 
 void fork_handler(k_id k, uint64_t _arg) {
-    pushk(continuation_copy(k));
+    k_id new_k = continuation_copy(k);
+    // print_stuff("copied = ", new_k);
+    pushk(new_k);
     restore(k, 0);
 }
 
@@ -49,6 +51,7 @@ void the_main() {
     x++;
     
     print_stuff("new x = ", x);
+    // print_stuff("copied2 = ", popk());
 }
 
 void driver(k_id k, uint64_t _arg) {
@@ -56,8 +59,11 @@ void driver(k_id k, uint64_t _arg) {
     the_main();
     if(num_k > 0) {
         k_id next = popk();
+        // print_stuff("Popped, invoking ", next);
         restore(next, 0);
     }
+
+    print_stuff("All done! ", 0);
 
     restore(k, 0);
 }
@@ -73,6 +79,7 @@ int main() {
 
     control(driver, 0);
 
+    print_stuff("All done main! ", 0);
 }
 
 
