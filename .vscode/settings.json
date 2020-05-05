@@ -46,6 +46,7 @@
         "streambuf": "cpp",
         "typeinfo": "cpp",
         "map": "cpp",
-        "continuations.h": "c"
+        "continuations.h": "c",
+        "hooks.h": "c"
     }
 }

@@ -9,21 +9,34 @@ typedef void (*control_handler_fn)(k_id, uint64_t);
 extern "C" {
 #endif
 
+// These get replaced with reads / writes to the global stack pointer
+char * __prim_get_shadow_stack_ptr();
+void __prim_set_shadow_stack_ptr(char *p);
+
+
+void EMSCRIPTEN_KEEPALIVE __hook_control(k_id k, uint64_t arg) {
+    __prim_set_shadow_stack_ptr(__prim_get_shadow_stack_ptr());
+}
+
+void EMSCRIPTEN_KEEPALIVE __hook_restore(k_id k, uint64_t v) {
+    // __prim_hook_restore_pre();
+}
+
+void EMSCRIPTEN_KEEPALIVE __hook_copy(k_id k, k_id new_k) {
+    // __prim_hook_copy_post();
+}
+
+void EMSCRIPTEN_KEEPALIVE __hook_delete(k_id k) {
+    // __prim_hook_delete_post();
+}
+
 // These get replaced with calls to the Wasm instructions
 uint64_t __prim_control(uint64_t arg, control_handler_fn fn_ptr);
 void __prim_restore(k_id k, uint64_t val);
 uint64_t __prim_continuation_copy(k_id k);
 void __prim_continuation_delete(k_id k);
 
-// // These get replaced with inline Wasm code
-// void __prim_hook_control_post();
-// void __prim_hook_restore_pre();
-// void __prim_hook_copy_post();
-// void __prim_hook_delete_post();
 
-// These get replaced with reads / writes to the global stack pointer
-char * __prim_get_shadow_stack_ptr();
-void __prim_set_shadow_stack_ptr(char *p);
 
 // This is replaced with nop
 int __prim_inhibit_optimizer();
@@ -37,10 +50,6 @@ void __shim_handler(k_id k, uint64_t arg);
     } \
 
 
-void EMSCRIPTEN_KEEPALIVE __hook_control(k_id k, uint64_t arg) {
-    __prim_set_shadow_stack_ptr(__prim_get_shadow_stack_ptr());
-}
-
 control_handler_fn __global_control_tmp_f;
 void __shim_handler(k_id k, uint64_t arg) {
     __hook_control(k, arg); 
@@ -53,17 +62,10 @@ uint64_t __shim_control(control_handler_fn f, uint64_t arg) {
     return __prim_control(arg, __shim_handler);
 }
 
-void EMSCRIPTEN_KEEPALIVE __hook_restore(k_id k, uint64_t v) {
-    // __prim_hook_restore_pre();
-}
 
 void __shim_restore(k_id k, uint64_t v) {
     __hook_restore(k, v);
     __prim_restore(k, v);
-}
-
-void EMSCRIPTEN_KEEPALIVE __hook_copy(k_id k, k_id new_k) {
-    // __prim_hook_copy_post();
 }
 
 
@@ -71,10 +73,6 @@ k_id __shim_continuation_copy(k_id k) {
     uint64_t new_k = __prim_continuation_copy(k);
     __hook_copy(k, new_k);
     return new_k;
-}
-
-void EMSCRIPTEN_KEEPALIVE __hook_delete(k_id k) {
-    // __prim_hook_delete_post();
 }
 
 void __shim_continuation_delete(k_id k) {
