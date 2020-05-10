@@ -46,7 +46,7 @@ char * alloc_stack() {
 
 
 void EMSCRIPTEN_KEEPALIVE initialize_continuations() {
-    cont_stack_table = malloc(sizeof(char *) * CONT_TABLE_SIZE);
+    cont_stack_table = malloc(sizeof(char *) * CONT_TABLE_SIZE * 2);
     // printf("alloc table: %d\n", cont_stack_table);
 }
 
