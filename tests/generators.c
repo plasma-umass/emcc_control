@@ -78,6 +78,7 @@ void example_generator(Generator *g) {
     }
 }
 int main() {
+    initialize_continuations();
     Generator *g = make_generator(example_generator);
     for(int i = 0; i < 10; i++) {
         printf("%llu\n", gen_next(g));
