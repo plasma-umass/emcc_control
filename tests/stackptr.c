@@ -48,6 +48,7 @@ void the_main() {
 
     fork();
 
+    // (*xp)++;
     x++;
     
     print_stuff("new x = ", x);
