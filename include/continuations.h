@@ -201,11 +201,16 @@ void EMSCRIPTEN_KEEPALIVE __hook_delete(k_id kid) {
     free(k->copied_stack_bottom);
 }
 
+void EMSCRIPTEN_KEEPALIVE __hook_prompt() {
+    printf("Hook prompt!\n");
+}
+
 // These get replaced with calls to the Wasm instructions
 uint64_t __prim_control(uint64_t arg, control_handler_fn fn_ptr);
 void __prim_restore(k_id k, uint64_t val);
 uint64_t __prim_continuation_copy(k_id k);
 void __prim_continuation_delete(k_id k);
+void __prim_prompt();
 
 
 
@@ -251,11 +256,17 @@ void __shim_continuation_delete(k_id k) {
     __hook_delete(k);
 }
 
+void __shim_prompt() {
+    __prim_prompt();
+    __hook_prompt();
+}
+
 
 #define control(f, arg) __shim_control(f, arg)
 #define restore(k, v) __shim_restore(k, v) // __prim_restore_pre_hook() __prim_restore(k, v)
 #define continuation_copy(k) __shim_continuation_copy(k)
 #define continuation_delete(k) __shim_continuation_delete(k)
+#define prompt __shim_prompt()
 
 
 
