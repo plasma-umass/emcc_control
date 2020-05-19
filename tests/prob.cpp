@@ -223,6 +223,8 @@ template<class T> void print_and_free(T *v) {
 
 
 int main() {
+    initialize_continuations();
+    
     print_and_free((std::map<uint64_t, double> *)control(the_main, (uint64_t)even_dice_plus_geom));
 
     return 0;

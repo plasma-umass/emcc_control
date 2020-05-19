@@ -1,3 +1,4 @@
+#include <emscripten/emscripten.h>
 #include "../include/continuations.h"
 #include <stdio.h>
 #include <stdint.h>
@@ -314,6 +315,8 @@ template<class U, class T> std::vector<U> cast_vec(std::vector<T> *v) {
 }
 
 int main() {
+    initialize_continuations();
+
     print_and_free((std::vector<uint64_t> *)control(the_main, (uint64_t)mult_ex));
     print_and_free((std::vector<uint64_t> *)control(the_main, (uint64_t)even_dice));
 

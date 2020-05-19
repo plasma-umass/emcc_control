@@ -46,7 +46,7 @@ void set_current_stack_top(char *x) {
 
 
 void EMSCRIPTEN_KEEPALIVE initialize_continuations() {
-    cont_table = malloc(sizeof(Continuation) * CONT_TABLE_SIZE);
+    cont_table = (Continuation *)malloc(sizeof(Continuation) * CONT_TABLE_SIZE);
     // printf("alloc table: %d\n", cont_stack_table);
     set_current_stack_top(__prim_get_shadow_stack_ptr());
 }
@@ -61,7 +61,7 @@ void EMSCRIPTEN_KEEPALIVE __hook_control(k_id k, uint64_t arg) {
     char *sp = __prim_get_shadow_stack_ptr();
 
     uint64_t num_bytes = (uint64_t)current_stack_top - (uint64_t)sp; // + 1 ?
-    char *new_stack_bottom = malloc(sizeof(char) * num_bytes);
+    char *new_stack_bottom = (char *)malloc(sizeof(char) * num_bytes);
     char *new_stack_top = new_stack_bottom + num_bytes - 1;
     memcpy(new_stack_bottom, sp + 1 /* + 0 ? */, num_bytes);
     cont_table[k].copied_stack_bottom = new_stack_bottom;
@@ -154,7 +154,7 @@ void EMSCRIPTEN_KEEPALIVE __hook_copy(k_id kid, k_id new_kid) {
 
     Continuation *k = &cont_table[kid];
     Continuation *new_k = &cont_table[new_kid];
-    new_k->copied_stack_bottom = malloc(sizeof(char) * k->num_bytes);
+    new_k->copied_stack_bottom = (char *)malloc(sizeof(char) * k->num_bytes);
     new_k->copied_stack_top = new_k->copied_stack_bottom + k->num_bytes - 1;
     new_k->saved_sp = k->saved_sp;
     new_k->saved_current_stack_top = k->saved_current_stack_top;
