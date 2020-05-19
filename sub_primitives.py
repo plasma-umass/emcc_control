@@ -32,8 +32,10 @@ wat = re.compile(r'call \$__prim_restore').sub('restore', wat)
 wat = re.compile(r'call \$__prim_continuation_copy').sub('continuation_copy', wat)
 # Replace $__prim_continuation_delete calls
 wat = re.compile(r'call \$__prim_continuation_delete').sub('continuation_delete', wat)
-# Replace $__prim_prompt calls
-wat = re.compile(r'call \$__prim_prompt').sub('prompt', wat)
+# Replace $__prim_prompt_begin calls
+wat = re.compile(r'call \$__prim_prompt_begin').sub('(prompt', wat)
+# Replace $__prim_prompt_end calls
+wat = re.compile(r'call \$__prim_prompt_end').sub(')', wat)
 
 # Delete the stub imports for the primitives
 def delete_import(wat, imp):
@@ -43,7 +45,8 @@ wat = delete_import(wat, '__prim_control')
 wat = delete_import(wat, '__prim_restore')
 wat = delete_import(wat, '__prim_continuation_copy')
 wat = delete_import(wat, '__prim_continuation_delete')
-wat = delete_import(wat, '__prim_prompt')
+wat = delete_import(wat, '__prim_prompt_begin')
+wat = delete_import(wat, '__prim_prompt_end')
 wat = delete_import(wat, '__prim_inhibit_optimizer')
 
 wat = delete_import(wat, '__prim_get_shadow_stack_ptr')
