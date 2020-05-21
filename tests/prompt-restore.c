@@ -1,8 +1,6 @@
 #include <emscripten/emscripten.h>
 #include "../include/continuations.h"
-// #include <stdio.h>
-// #include <stdint.h>
-// #include <stdlib.h>
+#include <stdio.h>
 
 k_id k1;
 k_id k2;
