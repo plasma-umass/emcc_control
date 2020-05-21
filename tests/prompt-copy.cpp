@@ -11,7 +11,7 @@
 std::vector<k_id> rest;
 
 void fork_handler(k_id k, uint64_t _args) {
-    rest.push_back(continuation_copy(k));
+    rest.push_back(continuation_copy(k)); // <--- THIS LINE OF CODE TRIGGERS A TRAP, SINCE ITS NOT ALLOWED
     restore(k, 0);
 }
 DONT_DELETE_MY_HANDLER(fork_handler)

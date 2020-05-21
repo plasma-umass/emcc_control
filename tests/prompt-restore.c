@@ -11,7 +11,8 @@ void h2(k_id k, uint64_t arg) {
     k2 = k;
 
     printf("Restoring!\n");
-    restore(k1, 0); // Change between k2 (ok) and k1 (bad)
+    restore(k1, 0); // <--- THIS LINE OF CODE TRIGGERS A TRAP, SINCE ITS NOT ALLOWED
+    // restore(k2, 0); // This line of code is ok.
 }
 
 void bad() {
