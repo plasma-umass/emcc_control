@@ -5,7 +5,10 @@ emsdk_setup > /dev/null
 
 set -e
 
-emcc "$1" -std=c++11 -g -Os -o "$2.wasm" -s NO_EXIT_RUNTIME=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0
-wasm2wat "$2.wasm" -o "$2"
-rm "$2.wasm"
-python3 sub_primitives.py "$2"
+out_arg=${@:$#} # last parameter 
+in_args=${*%${!#}} # all parameters except the last
+
+emcc $in_args -std=c++11 -g -Os -o "$out_arg.wasm" -s NO_EXIT_RUNTIME=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0
+wasm2wat "$out_arg.wasm" -o "$out_arg"
+rm "$out_arg.wasm"
+python3 sub_primitives.py "$out_arg"
