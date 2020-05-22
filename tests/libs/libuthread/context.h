@@ -11,7 +11,6 @@
 #elif CONTEXT_IMPL == ASYNCIFY
 
 #elif CONTEXT_IMPL == SWAPCONTEXT
-    #define _XOPEN_SOURCE
     #include <ucontext.h>
     typedef struct {
         ucontext_t uctx;

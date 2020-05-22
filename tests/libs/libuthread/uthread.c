@@ -56,7 +56,7 @@ queue_t blockedOrZombieQueue = NULL;
 uthread_t nextTID = 1;
 
 void _debug_print_state(const char *funcName) {
-	// return;
+	return;
 	if(runningThread == NULL) {
 		printf("%s:\n", funcName);
 		printf("\tUnitialized!\n\n");
@@ -85,8 +85,6 @@ void uthread_init() {
 void uthread_yield(void)
 {
 	_debug_print_state(__func__);
-
-	printf("start uthread_yield()\n");
 
 	struct TCB *toMakeReady = runningThread;
 	struct TCB *toMakeRunning;
@@ -131,8 +129,6 @@ int uthread_create(uthread_func_t func, void *arg)
 {
 	_debug_print_state(__func__);
 
-	printf("start uthread_create()\n");
-
 	// Initialize library if needed
 	if(runningThread == NULL) {
 		abort();
@@ -166,8 +162,6 @@ int uthread_create(uthread_func_t func, void *arg)
 	queue_enqueue(readyQueue, threadTCB);
 
 	// preempt_enable();
-
-	printf("finish uthread_create()\n");
 
 	return threadTCB->tid;
 }
@@ -239,8 +233,6 @@ int _find_tid(queue_t q, void *data, void *arg) {
 int uthread_join(uthread_t tid, int *retval)
 {
 	_debug_print_state(__func__);
-
-	printf("start uthread_join()\n");
 
 	struct TCB *threadToJoin = NULL;
 

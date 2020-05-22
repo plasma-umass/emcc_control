@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// #ifdef _XOPEN_SOURCE
 #include <setjmp.h>
 // #endif
 
@@ -25,7 +24,7 @@ void *malloc16(size_t size) {
 }
 
 void *uthread_ctx_alloc_stack(void) {
-	return malloc16(UTHREAD_STACK_SIZE);
+	return malloc(UTHREAD_STACK_SIZE);
 }
 
 void uthread_ctx_destroy_stack(void *top_of_stack) {
