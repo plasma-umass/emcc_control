@@ -1,56 +1,20 @@
-// #include <assert.h>
-// #include <signal.h>
-// #include <stddef.h>
-
-#include <emscripten/emscripten.h>
-#include "../../../include/continuations.h"
 
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-// #include <sys/time.h>
 
+#include "config.h"
 #include "queue.h"
 #include "uthread.h"
+#include "context.h"
 
-
-
-
-void save_k_restore(k_id k, uint64_t after_capture) {
-	restore(after_capture, k);
-}
-
-uthread_func_t _to_capture;
-void init_handler(k_id k, uint64_t arg) {
-	uthread_func_t my_to_capture = _to_capture;
-
-	control(save_k_restore, k);
-	uthread_exit(my_to_capture((void *)arg));
-
-}
-
-k_id cont_init(uthread_func_t f, void *arg) {
-	_to_capture = f;
-	return control(init_handler, (uint64_t)arg);
-}
-
-k_id restore_to;
-void switch_handler(k_id k, uint64_t arg) {
-	*((k_id *)arg) = k;
-	restore(restore_to, 0);
-}
-
-void cont_switch(k_id *from, k_id to) {
-	restore_to = to;
-	control(switch_handler, (uint64_t)from);
-}
 
 // Define the different thread state possibilities
 enum ThreadState{Running, Ready, Blocked, Zombie};
 
 struct TCB {
 	uthread_t tid;
-	k_id k;
+	context_t context;
 	struct TCB *joiningThread;
 	enum ThreadState state;
 	int retVal; // Only valid if state == Zombie
@@ -92,7 +56,7 @@ queue_t blockedOrZombieQueue = NULL;
 uthread_t nextTID = 1;
 
 void _debug_print_state(const char *funcName) {
-	return;
+	// return;
 	if(runningThread == NULL) {
 		printf("%s:\n", funcName);
 		printf("\tUnitialized!\n\n");
@@ -106,7 +70,7 @@ void _debug_print_state(const char *funcName) {
 
 // Initialize the thread queues and set up the main thread
 void uthread_init() {
-	initialize_continuations();
+	context_initialize_lib();
 
 	// Create the thread queues
 	readyQueue = queue_create();
@@ -121,6 +85,8 @@ void uthread_init() {
 void uthread_yield(void)
 {
 	_debug_print_state(__func__);
+
+	printf("start uthread_yield()\n");
 
 	struct TCB *toMakeReady = runningThread;
 	struct TCB *toMakeRunning;
@@ -149,7 +115,7 @@ void uthread_yield(void)
 	// preempt_enable();
 
 	// Perform context switch from running (now ready) thread to the new thread
-	cont_switch(&toMakeReady->k, toMakeRunning->k);
+	context_switch(&toMakeReady->context, &toMakeRunning->context);
 }
 
 // Get TID of running thread
@@ -164,6 +130,8 @@ uthread_t uthread_self(void)
 int uthread_create(uthread_func_t func, void *arg)
 {
 	_debug_print_state(__func__);
+
+	printf("start uthread_create()\n");
 
 	// Initialize library if needed
 	if(runningThread == NULL) {
@@ -189,7 +157,7 @@ int uthread_create(uthread_func_t func, void *arg)
 	}
 
 	// Initialize the context
-	threadTCB->k = cont_init(func, arg);
+	context_init(&threadTCB->context, func, arg);
 
 	// preempt_disable();
 	
@@ -198,6 +166,8 @@ int uthread_create(uthread_func_t func, void *arg)
 	queue_enqueue(readyQueue, threadTCB);
 
 	// preempt_enable();
+
+	printf("finish uthread_create()\n");
 
 	return threadTCB->tid;
 }
@@ -250,7 +220,7 @@ void uthread_exit(int retval)
 	// preempt_enable();
 
 	// Perform context switch to next thread in ready queue
-	cont_switch(&toMakeZombie->k, toMakeRunning->k);
+	context_switch(&toMakeZombie->context, &toMakeRunning->context);
 }
 
 // Custom callback function for use with uthread_join()
@@ -269,6 +239,8 @@ int _find_tid(queue_t q, void *data, void *arg) {
 int uthread_join(uthread_t tid, int *retval)
 {
 	_debug_print_state(__func__);
+
+	printf("start uthread_join()\n");
 
 	struct TCB *threadToJoin = NULL;
 
@@ -338,7 +310,7 @@ int uthread_join(uthread_t tid, int *retval)
 	// preempt_enable();
 
 	// Perform context switch from running (now blocked) thread to a new thread
-	cont_switch(&toMakeBlocked->k, toMakeRunning->k);
+	context_switch(&toMakeBlocked->context, &toMakeRunning->context);
 
 	// Once threadToJoin dies, we can unblock runningThread
 	// And collect threadToJoin's retval, remove it from the queue, and free its TCB
@@ -355,6 +327,3 @@ int uthread_join(uthread_t tid, int *retval)
 	return 0;
 }
 
-DONT_DELETE_MY_HANDLER(switch_handler);
-DONT_DELETE_MY_HANDLER(save_k_restore);
-DONT_DELETE_MY_HANDLER(init_handler);
