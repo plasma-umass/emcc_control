@@ -8,7 +8,7 @@ in_files="$in_f tests/libs/libuthread/uthread.c tests/libs/libuthread/queue.c te
 
 if [ "$impl" = "CONTS" ]; then
     extra_args="libs/continuations.c -DCONTEXT_IMPL=CONTS"
-    ./emcc_control $in_files $extra_args "$out_f.wat"
+    emcc_control $in_files $extra_args "$out_f.wat"
 elif [ "$impl" = "ASYNCIFY" ]; then
     echo "NOT YET IMPLEMENTED"
 elif [ "$impl" = "SWAPCONTEXT" ]; then
