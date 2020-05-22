@@ -22,6 +22,6 @@
 
 void context_initialize_lib();
 void context_init(context_t *ctx, uthread_func_t f, void *arg);
-void context_switch(context_t *from, context_t *to);
+void context_switch(context_t *from, context_t to);
 
 #endif

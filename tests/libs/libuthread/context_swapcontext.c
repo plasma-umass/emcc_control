@@ -10,17 +10,11 @@
 #define UTHREAD_STACK_SIZE 32768
 
 
-void context_switch(SwapContext_ctx *from, SwapContext_ctx *to) {
-    if(swapcontext(&from->uctx, &to->uctx)) {
+void context_switch(SwapContext_ctx *from, SwapContext_ctx to) {
+    if(swapcontext(&from->uctx, &to.uctx)) {
         perror("swapcontext");
 		exit(1);
     }
-}
-
-void *malloc16(size_t size) {
-    void *mem = malloc(size+15);
-    void *ptr = (void *)(((uint64_t)mem+15) & ~ (uint64_t)0x0F);
-    return ptr;
 }
 
 void *uthread_ctx_alloc_stack(void) {

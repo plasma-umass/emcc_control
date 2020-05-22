@@ -113,7 +113,7 @@ void uthread_yield(void)
 	// preempt_enable();
 
 	// Perform context switch from running (now ready) thread to the new thread
-	context_switch(&toMakeReady->context, &toMakeRunning->context);
+	context_switch(&toMakeReady->context, toMakeRunning->context);
 }
 
 // Get TID of running thread
@@ -214,7 +214,7 @@ void uthread_exit(int retval)
 	// preempt_enable();
 
 	// Perform context switch to next thread in ready queue
-	context_switch(&toMakeZombie->context, &toMakeRunning->context);
+	context_switch(&toMakeZombie->context, toMakeRunning->context);
 }
 
 // Custom callback function for use with uthread_join()
@@ -302,7 +302,7 @@ int uthread_join(uthread_t tid, int *retval)
 	// preempt_enable();
 
 	// Perform context switch from running (now blocked) thread to a new thread
-	context_switch(&toMakeBlocked->context, &toMakeRunning->context);
+	context_switch(&toMakeBlocked->context, toMakeRunning->context);
 
 	// Once threadToJoin dies, we can unblock runningThread
 	// And collect threadToJoin's retval, remove it from the queue, and free its TCB

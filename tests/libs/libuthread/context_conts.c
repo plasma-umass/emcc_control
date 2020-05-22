@@ -29,8 +29,8 @@ void switch_handler(k_id k, uint64_t arg) {
 	restore(restore_to, 0);
 }
 
-void context_switch(k_id *from, k_id *to) {
-	restore_to = *to;
+void context_switch(k_id *from, k_id to) {
+	restore_to = to;
 	control(switch_handler, (uint64_t)from);
 }
 

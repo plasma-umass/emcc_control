@@ -5,8 +5,4 @@
 #define ASYNCIFY 2
 #define SWAPCONTEXT 3
 
-
-// ********* CHANGE THIS TO CHANGE THE IMPLEMENTATION OF THE THREADING **************
-#define CONTEXT_IMPL SWAPCONTEXT
-
 #endif
