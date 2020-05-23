@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
     for(int thread = 0; thread < NUM_THREADS; thread++) {
         threads[thread].from = thread * termsPerThread;
         threads[thread].to = termsPerThread + thread*termsPerThread - 1;
-        threads[thread].tid = uthread_create(terms, &threads[thread]);
+        uthread_create(&threads[thread].tid, terms, &threads[thread]);
     }
 
     double pi = 0;

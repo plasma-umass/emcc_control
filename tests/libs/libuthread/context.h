@@ -1,6 +1,7 @@
 #ifndef _CONTEXT_H
 #define _CONTEXT_H
 
+#include "config.h"
 #include "uthread.h"
 
 
@@ -20,8 +21,12 @@
 #endif
 
 
+#if CONTEXT_IMPL != PTHREAD
+
 void context_initialize_lib();
 void context_init(context_t *ctx, uthread_func_t f, void *arg);
 void context_switch(context_t *from, context_t to);
+
+#endif
 
 #endif

@@ -4,5 +4,6 @@
 #define CONTS 1
 #define ASYNCIFY 2
 #define SWAPCONTEXT 3
+#define PTHREAD 4
 
 #endif

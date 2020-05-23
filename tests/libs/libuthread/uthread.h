@@ -1,6 +1,9 @@
 #ifndef _UTHREAD_H
 #define _UTHREAD_H
 
+#include "config.h"
+#if CONTEXT_IMPL != PTHREAD
+
 /*
  * uthread_t - Thread identifier (TID) type
  *
@@ -18,7 +21,8 @@ typedef unsigned short uthread_t;
  *
  * Return: Integer value
  */
-typedef int (*uthread_func_t)(void *arg);
+
+typedef void* (*uthread_func_t)(void *arg);
 
 void uthread_init();
 
@@ -33,7 +37,8 @@ void uthread_init();
  * Return: -1 in case of failure (memory allocation, context creation, TID
  * overflow, etc.). The TID of the new thread otherwise.
  */
-int uthread_create(uthread_func_t func, void *arg);
+
+int uthread_create(uthread_t *t, uthread_func_t func, void *arg);
 
 /*
  * uthread_self - Get thread identifier
@@ -82,5 +87,14 @@ void uthread_exit(int retval);
  * cannot be found, or if thread @tid is already being joined. 0 otherwise.
  */
 int uthread_join(uthread_t tid, int *retval);
+
+#else
+#include <pthread.h>
+#define uthread_t pthread_t
+#define uthread_create(t, f, x) pthread_create(t, NULL, f, x) 
+#define uthread_join(t, rv) pthread_join(t, NULL)
+#define uthread_yield() do {} while (0)
+#define uthread_init() do {} while (0)
+#endif
 
 #endif /* _THREAD_H */

@@ -1,9 +1,10 @@
+#include "config.h"
+#if CONTEXT_IMPL != PTHREAD
 
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "config.h"
 #include "queue.h"
 #include "uthread.h"
 #include "context.h"
@@ -125,7 +126,7 @@ uthread_t uthread_self(void)
 }
 
 // Create a new thread running the function func with the argument arg
-int uthread_create(uthread_func_t func, void *arg)
+int uthread_create(uthread_t *out_t, uthread_func_t func, void *arg)
 {
 	_debug_print_state(__func__);
 
@@ -163,7 +164,8 @@ int uthread_create(uthread_func_t func, void *arg)
 
 	// preempt_enable();
 
-	return threadTCB->tid;
+	*out_t = threadTCB->tid;
+	return 0;
 }
 
 // Exit from running thread to complete its execution
@@ -319,3 +321,4 @@ int uthread_join(uthread_t tid, int *retval)
 	return 0;
 }
 
+#endif

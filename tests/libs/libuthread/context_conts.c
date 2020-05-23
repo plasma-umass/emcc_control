@@ -10,8 +10,8 @@ void init_handler(k_id k, uint64_t arg) {
 	uthread_func_t my_to_capture = _to_capture;
 
 	control(save_k_restore, k);
-	uthread_exit(my_to_capture((void *)arg));
-
+	my_to_capture((void *)arg);
+	uthread_exit(0);
 }
 
 k_id context_init_helper(uthread_func_t f, void *arg) {

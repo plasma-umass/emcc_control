@@ -33,7 +33,8 @@ static void uthread_ctx_bootstrap(uthread_func_t func, void *arg)
 	// preempt_enable();
 
 	/* Execute thread and when done, exit with the return value */
-	uthread_exit(func(arg));
+    func(arg);
+	uthread_exit(0);
 }
 
 void context_init(SwapContext_ctx *ctx, uthread_func_t func, void *arg) {
@@ -50,7 +51,5 @@ void context_init(SwapContext_ctx *ctx, uthread_func_t func, void *arg) {
 }
 
 
-void context_initialize_lib() {
-
-}
+void context_initialize_lib() {}
 
