@@ -1,6 +1,6 @@
 #!/bin/bash
 shopt -s expand_aliases
-source ~/.bashrc
+source ~/.bash_aliases
 emsdk_setup > /dev/null
 
 set -e
