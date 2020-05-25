@@ -1,5 +1,6 @@
 #include "config.h"
-#if CONTEXT_IMPL != NATIVE_PTHREAD
+
+#if NEED_CONTEXT
 
 #include <stdint.h>
 #include <stdio.h>

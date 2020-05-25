@@ -21,7 +21,7 @@
 #endif
 
 
-#if CONTEXT_IMPL != NATIVE_PTHREAD
+#if NEED_CONTEXT
 
 void context_initialize_lib();
 void context_init(context_t *ctx, uthread_func_t f, void *arg);

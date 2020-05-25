@@ -2,7 +2,8 @@
 #define _UTHREAD_H
 
 #include "config.h"
-#if CONTEXT_IMPL != NATIVE_PTHREAD
+
+#if NEED_CONTEXT
 
 /*
  * uthread_t - Thread identifier (TID) type
@@ -88,13 +89,23 @@ void uthread_exit(int retval);
  */
 int uthread_join(uthread_t tid, int *retval);
 
-#else
+#elif CONTEXT_IMPL == NATIVE_PTHREAD
+
 #include <pthread.h>
 #define uthread_t pthread_t
 #define uthread_create(t, f, x) pthread_create(t, NULL, f, x) 
 #define uthread_join(t, rv) pthread_join(t, NULL)
 #define uthread_yield() do {} while (0)
 #define uthread_init() do {} while (0)
+
+#elif (CONTEXT_IMPL == NATIVE_SERIAL || CONTEXT_IMPL == WASMTIME_SERIAL)
+
+#define uthread_t int
+#define uthread_create(t, f, x) f(x)
+#define uthread_join(t, rv) do {} while (0)
+#define uthread_yield() do {} while (0)
+#define uthread_init() do {} while (0)
+
 #endif
 
 #endif /* _THREAD_H */
