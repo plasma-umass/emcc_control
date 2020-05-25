@@ -1,5 +1,5 @@
 #include "config.h"
-#if CONTEXT_IMPL != PTHREAD
+#if CONTEXT_IMPL != NATIVE_PTHREAD
 
 #include <stdint.h>
 #include <stdio.h>

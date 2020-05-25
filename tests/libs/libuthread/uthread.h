@@ -2,7 +2,7 @@
 #define _UTHREAD_H
 
 #include "config.h"
-#if CONTEXT_IMPL != PTHREAD
+#if CONTEXT_IMPL != NATIVE_PTHREAD
 
 /*
  * uthread_t - Thread identifier (TID) type
