@@ -5,13 +5,13 @@
 #include "uthread.h"
 
 
-#if CONTEXT_IMPL == CONTS
+#if CONTEXT_IMPL == WASMTIME_CONTS
     #include <emscripten/emscripten.h>
     #include "../../../include/continuations.h"
     #define context_t k_id
-#elif CONTEXT_IMPL == ASYNCIFY
+#elif CONTEXT_IMPL == WASMTIME_ASYNCIFY
 
-#elif CONTEXT_IMPL == SWAPCONTEXT
+#elif CONTEXT_IMPL == NATIVE_SWAPCONTEXT
     #include <ucontext.h>
     typedef struct {
         ucontext_t uctx;
@@ -21,7 +21,7 @@
 #endif
 
 
-#if CONTEXT_IMPL != PTHREAD
+#if CONTEXT_IMPL != NATIVE_PTHREAD
 
 void context_initialize_lib();
 void context_init(context_t *ctx, uthread_func_t f, void *arg);

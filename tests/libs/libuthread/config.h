@@ -1,9 +1,9 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-#define CONTS 1
-#define ASYNCIFY 2
-#define SWAPCONTEXT 3
-#define PTHREAD 4
+#define WASMTIME_CONTS 1
+#define WASMTIME_ASYNCIFY 2
+#define NATIVE_SWAPCONTEXT 3
+#define NATIVE_PTHREAD 4
 
 #endif
