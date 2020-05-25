@@ -322,4 +322,19 @@ int uthread_join(uthread_t tid, int *retval)
 	return 0;
 }
 
+#else
+
+void null_uthread_init() {
+
+}
+int null_uthread_create(int *t, void *f, void *arg) {
+	return 0;
+}
+void null_uthread_yield(void) {
+	return;
+}
+int null_uthread_join(int t, int *retval) {
+	return 0;
+}
+
 #endif

@@ -3,6 +3,12 @@
 
 #include "config.h"
 
+void null_uthread_init();
+int null_uthread_create(int *t, void *f, void *arg);
+void null_uthread_yield(void);
+int null_uthread_join(int t, int *retval);
+
+
 #if NEED_CONTEXT
 
 /*
@@ -95,16 +101,16 @@ int uthread_join(uthread_t tid, int *retval);
 #define uthread_t pthread_t
 #define uthread_create(t, f, x) pthread_create(t, NULL, f, x) 
 #define uthread_join(t, rv) pthread_join(t, NULL)
-#define uthread_yield() do {} while (0)
-#define uthread_init() do {} while (0)
+#define uthread_yield() null_uthread_yield()
+#define uthread_init() null_uthread_init()
 
 #elif (CONTEXT_IMPL == NATIVE_SERIAL || CONTEXT_IMPL == WASMTIME_SERIAL)
 
 #define uthread_t int
 #define uthread_create(t, f, x) f(x)
-#define uthread_join(t, rv) do {} while (0)
-#define uthread_yield() do {} while (0)
-#define uthread_init() do {} while (0)
+#define uthread_join(t, rv) null_uthread_join(t, rv)
+#define uthread_yield() null_uthread_yield()
+#define uthread_init() null_uthread_init()
 
 #endif
 
