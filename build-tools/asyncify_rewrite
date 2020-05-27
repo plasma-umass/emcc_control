@@ -1,0 +1,8 @@
+#!/bin/bash
+
+in=$1
+out=$2
+
+wat2wasm --debug-names "$in" -o temp.wasm
+wasm-opt temp.wasm -O --asyncify --print > "$out"
+rm temp.wasm

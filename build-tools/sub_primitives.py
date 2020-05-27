@@ -53,6 +53,18 @@ wat = delete_import(wat, '__prim_inhibit_optimizer')
 wat = delete_import(wat, '__prim_get_shadow_stack_ptr')
 wat = delete_import(wat, '__prim_set_shadow_stack_ptr')
 
+wat = re.compile(r'\(import "env" "asyncify_start_unwind"').sub('(import "asyncify" "start_unwind"', wat)
+wat = re.compile(r'\(import "env" "asyncify_stop_unwind"').sub('(import "asyncify" "stop_unwind"', wat)
+wat = re.compile(r'\(import "env" "asyncify_start_rewind"').sub('(import "asyncify" "start_rewind"', wat)
+wat = re.compile(r'\(import "env" "asyncify_stop_rewind"').sub('(import "asyncify" "stop_rewind"', wat)
+
+
+# wat = delete_import(wat, 'asyncify_start_unwind')
+# wat = delete_import(wat, 'asyncify_stop_unwind')
+# wat = delete_import(wat, 'asyncify_start_rewind')
+# wat = delete_import(wat, 'asyncify_stop_rewind')
+
+
 # Delete calls to $__prim_inhibit_optimizer
 wat = re.compile(r'call \$__prim_inhibit_optimizer').sub('i32.const 0', wat)
 
