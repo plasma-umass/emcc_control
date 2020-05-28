@@ -5,15 +5,6 @@
 char sleeping = 0;
 uint32_t buf;
 
-uint32_t alloc_asyncify_buf() {
-    uint32_t stack = (uint32_t)malloc(1024);
-    uint32_t stack_end = stack + 1024;
-    uint32_t *buf = (uint32_t *)malloc(sizeof(uint32_t)*2);
-    buf[0] = stack;
-    buf[1] = stack_end;
-    return (uint32_t)buf;
-}
-
 void my_sleep() {
     if(sleeping == 0) {
         sleeping = 1;
