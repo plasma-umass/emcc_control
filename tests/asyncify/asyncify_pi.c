@@ -5,11 +5,11 @@
 
 #include "../libs/libuthread/queue.h"
 
-#define NUM_TERMS 262144
-#define NUM_THREADS 16
+#define NUM_THREADS 4
 
-uint64_t termsPerThread = NUM_TERMS / NUM_THREADS;
+
 uint64_t termsPerYield = 1;
+uint64_t termsPerThread;
 
 int active_thread;
 char sleeping = 0;
@@ -32,7 +32,9 @@ void enqueue(int tid) {
 int dequeue() {
     struct TCB *tcb;
     queue_dequeue(Q, (void **)&tcb);
-    return tcb->tid;
+    int tid = tcb-> tid;
+    free(tcb);
+    return tid;
 }
 
 int queue_len() {
@@ -90,7 +92,19 @@ void scheduler() {
     active_thread = dequeue();
 }
 
-int main() {
+uint64_t exp2_int(uint64_t x) {
+    uint64_t y = 1;
+    for(uint64_t i = 0; i < x; i++) {
+        y *= 2;
+    }
+    return y;
+}
+
+int main(int argc, char ** argv) {
+    uint64_t NUM_TERMS = exp2_int(atoi(argv[1]));
+    termsPerThread = NUM_TERMS / NUM_THREADS;
+    termsPerYield = exp2_int(atoi(argv[2]));
+
     Q = queue_create();
     for(int tid = 0; tid < NUM_THREADS; tid++) {
         asyncify_bufs[tid] = alloc_asyncify_buf();
@@ -123,6 +137,10 @@ int main() {
     for(int tid = 0; tid < NUM_THREADS; tid++) {
         sum += results[tid];
     }
+
+    // if(sum > 0.5) {
+    //     printf("Big!\n");
+    // }
 
     printf("%f\n", sum);
 }
