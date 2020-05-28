@@ -49,10 +49,18 @@ void __shim_continuation_delete(k_id k);
     } \
 
 
+#if NO_C_STACK == 1
+#define control(f, arg) __prim_control(arg, f)
+#define restore(k, v) __prim_restore(k, v) // __prim_restore_pre_hook() __prim_restore(k, v)
+#define continuation_copy(k) __prim_continuation_copy(k)
+#define continuation_delete(k) __prim_continuation_delete(k)
+#else
 #define control(f, arg) __shim_control(f, arg)
 #define restore(k, v) __shim_restore(k, v) // __prim_restore_pre_hook() __prim_restore(k, v)
 #define continuation_copy(k) __shim_continuation_copy(k)
 #define continuation_delete(k) __shim_continuation_delete(k)
+#endif
+
 #define prompt(x) __prim_prompt_begin(); x; __prim_prompt_end();
 
 void initialize_continuations();
