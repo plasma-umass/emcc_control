@@ -2,11 +2,14 @@
 #include "../../../include/continuations.h"
 
 void save_k_restore(k_id k, uint64_t after_capture) {
+	__hook_control(k, after_capture);
 	restore(after_capture, k);
 }
 
 uthread_func_t _to_capture;
 void init_handler(k_id k, uint64_t arg) {
+	__hook_control(k, arg);
+
 	uthread_func_t my_to_capture = _to_capture;
 
 	control(save_k_restore, k);
@@ -25,6 +28,7 @@ void context_init(k_id *k, uthread_func_t f, void *arg) {
 
 k_id restore_to;
 void switch_handler(k_id k, uint64_t arg) {
+	__hook_control(k, arg);
 	*((k_id *)arg) = k;
 	restore(restore_to, 0);
 }
