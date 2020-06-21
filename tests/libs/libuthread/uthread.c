@@ -1,6 +1,6 @@
 #include "config.h"
 
-#define NEED_CONTEXT 1
+// #define NEED_CONTEXT 1
 #if NEED_CONTEXT
 
 #include <stdint.h>
@@ -79,7 +79,7 @@ void uthread_init_main(void (*f)(void*), void *arg) {
 	readyQueue = queue_create();
 	blockedOrZombieQueue = queue_create();
 
-	// Create and enqueue TCB for the main thread (TID = 0)
+	// Create a TCB for the main thread (TID = 0)
 	struct TCB *mainTCB = newTCB(0, Running);
 	runningThread = mainTCB;
 

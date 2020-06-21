@@ -10,7 +10,7 @@
     #include "../../../include/continuations.h"
     #define context_t k_id
 #elif CONTEXT_IMPL == WASMTIME_ASYNCIFY
-
+    #define context_t uint32_t // pointer to asyncify data structure
 #elif CONTEXT_IMPL == NATIVE_SWAPCONTEXT
     #include <ucontext.h>
     typedef struct {
@@ -24,6 +24,7 @@
 #if NEED_CONTEXT
 
 void context_initialize_lib();
+void context_main(void (*f)(void*), void *arg);
 void context_init(context_t *ctx, uthread_func_t f, void *arg);
 void context_switch(context_t *from, context_t to);
 

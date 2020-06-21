@@ -45,3 +45,7 @@ void context_initialize_lib() {
 DONT_DELETE_MY_HANDLER(switch_handler);
 DONT_DELETE_MY_HANDLER(save_k_restore);
 DONT_DELETE_MY_HANDLER(init_handler);
+
+void context_main(void (*f)(void*), void *arg) {
+	f(arg);
+}

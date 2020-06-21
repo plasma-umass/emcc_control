@@ -53,3 +53,6 @@ void context_init(SwapContext_ctx *ctx, uthread_func_t func, void *arg) {
 
 void context_initialize_lib() {}
 
+void context_main(void (*f)(void*), void *arg) {
+	f(arg);
+}
