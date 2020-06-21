@@ -1,6 +1,6 @@
 #include "config.h"
 
-// #define NEED_CONTEXT 1
+#define NEED_CONTEXT 1
 #if NEED_CONTEXT
 
 #include <stdint.h>
@@ -72,7 +72,7 @@ void _debug_print_state(const char *funcName) {
 }
 
 // Initialize the thread queues and set up the main thread
-void uthread_init() {
+void uthread_init_main(void (*f)(void*), void *arg) {
 	context_initialize_lib();
 
 	// Create the thread queues
@@ -82,6 +82,9 @@ void uthread_init() {
 	// Create and enqueue TCB for the main thread (TID = 0)
 	struct TCB *mainTCB = newTCB(0, Running);
 	runningThread = mainTCB;
+
+	// Run the main function
+	f(arg);
 }
 
 // Running thread yields to another thread to execute
@@ -325,8 +328,8 @@ int uthread_join(uthread_t tid, int *retval)
 
 #else
 
-void null_uthread_init() {
-
+void null_uthread_init_main(void (*f)(void*), void *arg);
+	f(arg);
 }
 int null_uthread_create(int *t, void *f, void *arg) {
 	return 0;

@@ -71,8 +71,8 @@ void terms() {
     double f = 0;
 
     for(uint64_t k = from; k <= to; k++) {
+        printf("tid = %d, k = %d\n", tid, (int)k);
         f += term((double)k, tid, k);
-        // printf("%d,%d\n", tid, (int)k);
         // my_sleep(tid);
         // printf("   %d,%d\n", tid, (int)k);
     }
@@ -85,12 +85,12 @@ void the_main() {
 }
 
 
-void scheduler() {
-    if(sleeping) {
-        enqueue(active_thread);
-    }
-    active_thread = dequeue();
-}
+// void scheduler() {
+//     if(sleeping) {
+//         enqueue(active_thread);
+//     }
+//     active_thread = dequeue();
+// }
 
 uint64_t exp2_int(uint64_t x) {
     uint64_t y = 1;
@@ -100,24 +100,24 @@ uint64_t exp2_int(uint64_t x) {
     return y;
 }
 
+void my_thread_create(int tid, void (*f)()) {
+    asyncify_bufs[tid] = alloc_asyncify_buf();
+    active_thread = tid;
+    sleeping = 0;
+    f();
+    asyncify_stop_unwind();
+    enqueue(tid);
+} 
+
 int main(int argc, char ** argv) {
     uint64_t NUM_TERMS = exp2_int(atoi(argv[1]));
     termsPerThread = NUM_TERMS / NUM_THREADS;
     termsPerYield = exp2_int(atoi(argv[2]));
 
     Q = queue_create();
-    for(int tid = 0; tid < NUM_THREADS; tid++) {
-        asyncify_bufs[tid] = alloc_asyncify_buf();
-    }
-
-    
 
     for(int tid = 0; tid < NUM_THREADS; tid++) {
-        active_thread = tid;
-        sleeping = 0;
-        the_main();
-        asyncify_stop_unwind();
-        enqueue(tid);   
+        my_thread_create(tid, the_main);  
     }
 
 

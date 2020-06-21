@@ -52,14 +52,8 @@ uint64_t exp2_int(uint64_t x) {
 }
 
 
-int main(int argc, char **argv) {
-    uthread_init();
-
-    // #define NUM_TERMS 268435456
-    if(argc != 2) {
-        printf("Expected 1 arg: log2(# terms)\n");
-        return 1;
-    }
+void the_main(void *argv_ptr) {
+    char **argv = argv_ptr;
 
     uint64_t NUM_TERMS = exp2_int(atoi(argv[1]));
     
@@ -83,6 +77,14 @@ int main(int argc, char **argv) {
 
     printf("%f\n", pi);
 
-
     // say_hi();
+}
+
+int main(int argc, char **argv) {
+    if(argc != 2) {
+        printf("Expected 1 arg: log2(# terms)\n");
+        return 1;
+    }
+
+    uthread_init_main(the_main, (void *)argv);
 }
