@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 //                268435456
-#define NUM_THREADS 4
+#define NUM_THREADS 16
 #define TERMS_PER_YIELD 1
 
 typedef struct {
@@ -26,7 +26,7 @@ double term(double kf, uint64_t ki) {
     return res;
 }
 
-void* terms(void *arg_tmp) {
+void terms(void *arg_tmp) {
     TermsArg *arg = (TermsArg *)arg_tmp;
     double f = 0;
     uint64_t from = arg->from;
@@ -34,13 +34,9 @@ void* terms(void *arg_tmp) {
 
     for(uint64_t k = from; k <= to; k++) {
         f += term(k, k);
-        printf("tid = %d\n", arg->tid);
     }
 
-    // printf("%f\n", f);
     arg->result = f;
-
-    return 0;
 }
 
 
@@ -61,19 +57,15 @@ void the_main(void *argv_ptr) {
 
     int termsPerThread = NUM_TERMS / NUM_THREADS;
 
-
     for(int thread = 0; thread < NUM_THREADS; thread++) {
         threads[thread].from = thread * termsPerThread;
         threads[thread].to = termsPerThread + thread*termsPerThread - 1;
         uthread_create(&threads[thread].tid, terms, &threads[thread]);
-        // printf("Created: %d\n", threads[thread].tid);
     }
 
     double pi = 0;
     for(int thread = 0; thread < NUM_THREADS; thread++) {
-        // printf("Joining tid = %d\n", threads[thread].tid);
         uthread_join(threads[thread].tid, NULL);
-        // printf("Done with tid = %d\n", threads[thread].tid);
         pi += threads[thread].result;
     }
 

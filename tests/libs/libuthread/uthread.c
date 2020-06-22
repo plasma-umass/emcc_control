@@ -38,6 +38,7 @@ void _print_TCB(struct TCB *tcb) {
 		case Ready: s = "Ready"; break;
 		case Blocked: s = "Blocked"; break;
 		case Zombie: s = "Zombie"; break;
+		// default: printf("????"); break;
 	}
 	printf("{ tid = %d, state = %s, retVal = %d }", tcb->tid, s, tcb->retVal);
 }
@@ -84,7 +85,8 @@ void uthread_init_main(void (*f)(void*), void *arg) {
 	runningThread = mainTCB;
 
 	// Run the main function
-	f(arg);
+	// f(arg);
+	context_main(f, arg);
 }
 
 // Running thread yields to another thread to execute
@@ -157,19 +159,21 @@ int uthread_create(uthread_t *out_t, uthread_func_t func, void *arg)
 		// The malloc for the TCB failed, so sad...
 		return -1;
 	}
+	threadTCB->tid = nextTID;
+	nextTID++;
+	*out_t = threadTCB->tid;
 
 	// Initialize the context
 	context_init(&threadTCB->context, func, arg);
 
 	// preempt_disable();
 	
-	threadTCB->tid = nextTID;
-	nextTID++;
+	
 	queue_enqueue(readyQueue, threadTCB);
 
 	// preempt_enable();
 
-	*out_t = threadTCB->tid;
+	// *out_t = threadTCB->tid;
 	return 0;
 }
 
@@ -221,6 +225,10 @@ void uthread_exit(int retval)
 	// preempt_enable();
 
 	// Perform context switch to next thread in ready queue
+	// printf("Switching to:\n");
+	// _print_TCB(toMakeZombie);
+	// _print_TCB(toMakeRunning);
+	// printf("\n");
 	context_switch(&toMakeZombie->context, toMakeRunning->context);
 }
 

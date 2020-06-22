@@ -28,7 +28,7 @@ typedef unsigned short uthread_t;
  * Return: Integer value
  */
 
-typedef void* (*uthread_func_t)(void *arg);
+typedef void (*uthread_func_t)(void *arg);
 
 void uthread_init_main(void (*f)(void *), void *arg);
 
