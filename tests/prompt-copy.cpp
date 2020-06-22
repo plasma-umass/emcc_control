@@ -10,11 +10,10 @@
 
 std::vector<k_id> rest;
 
-void fork_handler(k_id k, uint64_t _args) {
+DEFINE_HANDLER(fork_handler, k, _args, {
     rest.push_back(continuation_copy(k)); // <--- THIS LINE OF CODE TRIGGERS A TRAP, SINCE ITS NOT ALLOWED
     restore(k, 0);
-}
-DONT_DELETE_MY_HANDLER(fork_handler)
+})
 
 void fork() {
     control(fork_handler, 0);
@@ -62,11 +61,10 @@ void example() {
 }
 
 
-void the_main(k_id k, uint64_t u) {
+DEFINE_HANDLER(the_main, k, u, {
     driver((body_fn)u);
     restore(k, 0);
-}
-DONT_DELETE_MY_HANDLER(the_main)
+})
 
 
 int main() {

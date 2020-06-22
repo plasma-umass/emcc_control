@@ -27,7 +27,7 @@ void SUCCESS(uint64_t x) {
 
 #define FAILURE() restore(answer_k, 0);
 
-void choose_handler(k_id k, uint64_t args_ptr_tmp) {
+DEFINE_HANDLER(choose_handler, k, args_ptr_tmp, {
     std::vector<uint64_t> *args = (std::vector<uint64_t> *)args_ptr_tmp;
     
     for(int i = 1; i < args->size(); i++) {
@@ -42,8 +42,7 @@ void choose_handler(k_id k, uint64_t args_ptr_tmp) {
     delete args;
     
     restore(k, v);
-}
-DONT_DELETE_MY_HANDLER(choose_handler)
+})
 
 uint64_t choose_impl(std::vector<uint64_t> *args) {
     if(args->size() == 0) {
@@ -72,13 +71,12 @@ std::vector<uint64_t> *copy_array_vec(uint64_t *p, int n) {
 typedef void (*body_fn)();
 
 
-void driver_handler(k_id k, uint64_t body_func_tmp) {
+DEFINE_HANDLER(driver_handler, k, body_func_tmp, {
     body_fn body = (body_fn)body_func_tmp;
     answer_k = k;
     // body(k);
     body();
-}
-DONT_DELETE_MY_HANDLER(driver_handler)
+})
 
 
 
@@ -150,7 +148,8 @@ void mult_ex() {
     // answer_k = CONTINUATION_COPY(answer_k);
     // uint64_t x = (uint64_t)SUCCESS(CHOOSE(10, 20));
     // RESTORE(get_answer_k(), (uint64_t)SUCCESS(CHOOSE(10, 20)));
-    SUCCESS(CHOOSE(10, CHOOSE(20, 30)) * CHOOSE(30, 40));
+    uint64_t x = CHOOSE(20, 30);
+    SUCCESS(CHOOSE(10, x) * CHOOSE(30, 40));
     // RESTORE(answer_k, (uint64_t)SUCCESS(1234));
 
 }
@@ -294,10 +293,9 @@ void queens() {
 }
 
 
-void the_main(k_id k, uint64_t u) {
+DEFINE_HANDLER(the_main, k, u, {
     restore(k, (uint64_t)driver((body_fn)u));
-}
-DONT_DELETE_MY_HANDLER(the_main)
+})
 
 
 template<class T> void print_and_free(std::vector<T> *v) {

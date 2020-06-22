@@ -27,12 +27,12 @@ k_id popk() {
     return *stack_top;
 }
 
-void fork_handler(k_id k, uint64_t _arg) {
+DEFINE_HANDLER(fork_handler, k, _arg, {
     k_id new_k = continuation_copy(k);
     // print_stuff("copied = ", new_k);
     pushk(new_k);
     restore(k, 0);
-}
+})
 
 void fork() {
     control(fork_handler, 0);
@@ -55,8 +55,7 @@ void the_main() {
     // print_stuff("copied2 = ", popk());
 }
 
-void driver(k_id k, uint64_t _arg) {
-    
+DEFINE_HANDLER(driver, k, _arg, {    
     the_main();
     if(num_k > 0) {
         k_id next = popk();
@@ -67,7 +66,7 @@ void driver(k_id k, uint64_t _arg) {
     print_stuff("All done! ", 0);
 
     restore(k, 0);
-}
+})
 
 
 
@@ -83,14 +82,3 @@ int main() {
     print_stuff("All done main! ", 0);
 }
 
-
-DONT_DELETE_MY_HANDLER(pushk)
-DONT_DELETE_MY_HANDLER(popk)
-DONT_DELETE_MY_HANDLER(print_stuff)
-DONT_DELETE_MY_HANDLER(fork)
-DONT_DELETE_MY_HANDLER(fork_handler)
-
-DONT_DELETE_MY_HANDLER(the_main)
-
-DONT_DELETE_MY_HANDLER(driver)
-DONT_DELETE_MY_HANDLER(main)

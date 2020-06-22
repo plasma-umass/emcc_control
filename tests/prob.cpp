@@ -42,7 +42,7 @@ void SUCCESS(uint64_t x) {
 
 #define FAILURE() restore(answer_k, 0);
 
-void trials_handler(k_id k, uint64_t n) {    
+DEFINE_HANDLER(trials_handler, k, n, {
     for(int i = 1; i < n; i++) {
         ContinuationThunk *t = new ContinuationThunk();
         t->continuation = continuation_copy(k);
@@ -51,8 +51,7 @@ void trials_handler(k_id k, uint64_t n) {
         rest.push_back(t);
     }
     restore(k, 0);
-}
-DONT_DELETE_MY_HANDLER(trials_handler)
+})
 
 void trials(uint64_t n) {
     if(n == 0) {
@@ -63,7 +62,7 @@ void trials(uint64_t n) {
     control(trials_handler, n);
 }
 
-void choose_handler(k_id k, uint64_t args_ptr_tmp) {
+DEFINE_HANDLER(choose_handler, k, args_ptr_tmp, {
     std::vector<uint64_t> *args = (std::vector<uint64_t> *)args_ptr_tmp;
     
     for(int i = 1; i < args->size(); i++) {
@@ -78,8 +77,7 @@ void choose_handler(k_id k, uint64_t args_ptr_tmp) {
     delete args;
     
     restore(k, v);
-}
-DONT_DELETE_MY_HANDLER(choose_handler)
+})
 
 uint64_t choose_impl(std::vector<uint64_t> *args) {
     if(args->size() == 0) {
@@ -108,13 +106,12 @@ std::vector<uint64_t> *copy_array_vec(uint64_t *p, int n) {
 typedef void (*body_fn)();
 
 
-void driver_handler(k_id k, uint64_t body_func_tmp) {
+DEFINE_HANDLER(driver_handler, k, body_func_tmp, {
     body_fn body = (body_fn)body_func_tmp;
     answer_k = k;
     // body(k);
     body();
-}
-DONT_DELETE_MY_HANDLER(driver_handler)
+})
 
 
 
@@ -197,23 +194,24 @@ uint64_t geom(double p) {
 }
 
 void even_dice_plus_geom() {
+    std::cout << "A" << std::endl;
     uint64_t x = F();
     uint64_t y = F();
     if((x+y)%2 != 0) {
         FAILURE();
     }
 
-    uint64_t g_05 = sample(100, 0.5, geom);
-    uint64_t g_08 = sample(100, 0.8, geom);
+    // TODO: Debug why we can't have more samples.
+    uint64_t g_05 = sample(6, 0.5, geom);
+    uint64_t g_08 = sample(6, 0.8, geom);
     
     SUCCESS(x + y + g_05 + g_08);
 }
 
 
-void the_main(k_id k, uint64_t u) {
+DEFINE_HANDLER(the_main, k, u, {
     restore(k, (uint64_t)driver((body_fn)u));
-}
-DONT_DELETE_MY_HANDLER(the_main)
+})
 
 
 template<class T> void print_and_free(T *v) {

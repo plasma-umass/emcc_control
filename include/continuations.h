@@ -54,11 +54,21 @@ void __shim_continuation_delete(k_id k);
 #define restore(k, v) __prim_restore(k, v) // __prim_restore_pre_hook() __prim_restore(k, v)
 #define continuation_copy(k) __prim_continuation_copy(k)
 #define continuation_delete(k) __prim_continuation_delete(k)
+#define DEFINE_HANDLER(name, k_name, arg_name, body) void name(k_id k_name, uint64_t arg_name) { body } DONT_DELETE_MY_HANDLER(name);
+
 #else
 #define control(f, arg) __prim_control(arg, f)
 #define restore(k, v) __shim_restore(k, v)
 #define continuation_copy(k) __shim_continuation_copy(k)
 #define continuation_delete(k) __shim_continuation_delete(k)
+
+#define DEFINE_HANDLER(name, k_name, arg_name, body) void name(k_id k_name, uint64_t arg_name) { __hook_control(k_name, arg_name); body } DONT_DELETE_MY_HANDLER(name);
+
+// void save_k_restore(k_id k, uint64_t after_capture) {
+// 	__hook_control(k, after_capture);
+
+// 	restore(after_capture, k);
+// }
 #endif
 
 #define prompt(x) __prim_prompt_begin(); x; __prim_prompt_end();
