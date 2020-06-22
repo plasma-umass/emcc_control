@@ -172,11 +172,11 @@ void __hook_delete(k_id kid) {
 // }
 // DONT_DELETE_MY_HANDLER(__shim_handler)
 
-uint64_t __shim_control(control_handler_fn f, uint64_t arg) {
-    // __global_control_tmp_f = f;
-    // return __prim_control(arg, __shim_handler);
-    return __prim_control(arg, f);
-}
+// uint64_t __shim_control(control_handler_fn f, uint64_t arg) {
+//     // __global_control_tmp_f = f;
+//     // return __prim_control(arg, __shim_handler);
+//     return __prim_control(arg, f);
+// }
 
 
 void __shim_restore(k_id k, uint64_t v) {

@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//                268435456
 #define NUM_THREADS 16
 #define TERMS_PER_YIELD 1
 

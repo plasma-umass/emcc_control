@@ -3,6 +3,7 @@
 
 void save_k_restore(k_id k, uint64_t after_capture) {
 	__hook_control(k, after_capture);
+
 	restore(after_capture, k);
 }
 
@@ -29,6 +30,7 @@ void context_init(k_id *k, uthread_func_t f, void *arg) {
 k_id restore_to;
 void switch_handler(k_id k, uint64_t arg) {
 	__hook_control(k, arg);
+	
 	*((k_id *)arg) = k;
 	restore(restore_to, 0);
 }
