@@ -194,16 +194,14 @@ uint64_t geom(double p) {
 }
 
 void even_dice_plus_geom() {
-    std::cout << "A" << std::endl;
     uint64_t x = F();
     uint64_t y = F();
     if((x+y)%2 != 0) {
         FAILURE();
     }
 
-    // TODO: Debug why we can't have more samples.
-    uint64_t g_05 = sample(6, 0.5, geom);
-    uint64_t g_08 = sample(6, 0.8, geom);
+    uint64_t g_05 = sample(100, 0.5, geom);
+    uint64_t g_08 = sample(100, 0.8, geom);
     
     SUCCESS(x + y + g_05 + g_08);
 }

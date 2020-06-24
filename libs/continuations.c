@@ -27,15 +27,14 @@ char *current_stack_top;
 
 char *c_stacks_area = NULL;
 
-#define C_SMALL_STACK_SIZE 32 // 1024, 2^23, 8388608, 1048576
-#define C_SMALL_STACK_TABLE_SIZE 64
+#define C_SMALL_STACK_SIZE 128 // 1024, 2^23, 8388608, 1048576
+#define C_SMALL_STACK_TABLE_SIZE 128
 
 uint64_t free_c_stack_id_list[C_SMALL_STACK_TABLE_SIZE];
 uint64_t free_c_stack_id_list_top = 0; // From this index we will alloc the next stack id
 
 
 void set_current_stack_top(char *x) {
-    // printf("Setting current stack top to: %p\n", x);
     current_stack_top = x;
 }
 
@@ -47,19 +46,14 @@ void initialize_continuations() {
     for(int i = 0; i < C_SMALL_STACK_TABLE_SIZE; i++) {
         free_c_stack_id_list[i] = i;
     }
-    // printf("alloc table: %d\n", cont_stack_table);
     set_current_stack_top(__prim_get_shadow_stack_ptr());
 }
 
 void *stack_alloc(size_t size) {
-    if(size > 1024) {
-        // printf("fast1\n");
+    if(size > C_SMALL_STACK_SIZE) {
         return malloc(size);
     } else {
         if(free_c_stack_id_list_top == C_SMALL_STACK_TABLE_SIZE) {
-            // printf("Error: out of stacks to allocate.\n");
-            // abort();
-            // printf("fast1\n");
             return malloc(size);
         } else {
             uint64_t id = free_c_stack_id_list[free_c_stack_id_list_top++];
@@ -76,7 +70,6 @@ void stack_free(void *p) {
         uint64_t id = ((uint64_t)p - (uint64_t)((void *)c_stacks_area)) / C_SMALL_STACK_SIZE;
         free_c_stack_id_list[--free_c_stack_id_list_top] = id;
     } else {
-        // printf("fast2\n");
         free(p);
     }
 }
