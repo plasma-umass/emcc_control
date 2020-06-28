@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <emscripten/emscripten.h>
+// #include <emscripten/emscripten.h>
 
 #include "../include/continuations.h"
 
@@ -42,7 +42,7 @@ void set_current_stack_top(char *x) {
 void initialize_continuations() {
     cont_table = (Continuation *)malloc(sizeof(Continuation) * CONT_TABLE_SIZE);
 
-    c_stacks_area = malloc(C_SMALL_STACK_SIZE * C_SMALL_STACK_TABLE_SIZE);
+    c_stacks_area = (char *)malloc(C_SMALL_STACK_SIZE * C_SMALL_STACK_TABLE_SIZE);
     for(int i = 0; i < C_SMALL_STACK_TABLE_SIZE; i++) {
         free_c_stack_id_list[i] = i;
     }
@@ -50,6 +50,7 @@ void initialize_continuations() {
 }
 
 void *stack_alloc(size_t size) {
+    // printf("size = %d\n", (int)size);
     if(size > C_SMALL_STACK_SIZE) {
         return malloc(size);
     } else {
@@ -66,7 +67,7 @@ void *stack_alloc(size_t size) {
 
 
 void stack_free(void *p) {
-    if(p >= (void *)c_stacks_area && p < (void *)c_stacks_area + C_SMALL_STACK_SIZE * C_SMALL_STACK_TABLE_SIZE) {
+    if((char *)p >= c_stacks_area && (char *)p < c_stacks_area + C_SMALL_STACK_SIZE * C_SMALL_STACK_TABLE_SIZE) {
         uint64_t id = ((uint64_t)p - (uint64_t)((void *)c_stacks_area)) / C_SMALL_STACK_SIZE;
         free_c_stack_id_list[--free_c_stack_id_list_top] = id;
     } else {
@@ -74,7 +75,7 @@ void stack_free(void *p) {
     }
 }
 
-void __hook_control(k_id k, uint64_t arg) {
+void __hook_control(k_id k) {
     #if NO_C_STACK == 1
     return;
     #endif
@@ -108,7 +109,7 @@ void __hook_control(k_id k, uint64_t arg) {
 
 
 
-void __hook_restore(k_id kid, uint64_t v) {
+void __hook_restore(k_id kid) {
     // Need to:
     // 1. Copy copied stack back to (saved_sp, ...]
     // 2. Set sp to saved_sp
@@ -173,7 +174,7 @@ void __hook_delete(k_id kid) {
 
 
 void __shim_restore(k_id k, uint64_t v) {
-    __hook_restore(k, v);
+    __hook_restore(k);
     __prim_restore(k, v);
 }
 

@@ -1,4 +1,4 @@
-#include <emscripten/emscripten.h>
+// #include <emscripten/emscripten.h>
 #include "../include/continuations.h"
 #include <stdio.h>
 #include <stdint.h>

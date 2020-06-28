@@ -24,19 +24,21 @@ void context_initialize_lib() {
 asyncify_context active_context;
 asyncify_context next_context;
 
-void context_main(void (*f)(void*), void *arg) {
+void context_main(void (*f)(int, char**), int argc, char **argv) {
     active_context.async_buf = alloc_asyncify_buf();
     active_context.f = f;
-    active_context.arg1 = arg;
-    active_context.is_two_args = 0;
+    active_context.arg1 = (void *)argc;
+    active_context.arg2 = argv;
+    active_context.is_two_args = 1;
     active_context.is_async = 0;
 
     // printf("A\n");
-    f(arg);
+    f(argc, argv);
     while(sleeping) {
         // if(sleeping) {
             asyncify_stop_unwind();
             // active_thread = next_tid;
+            
             active_context = next_context;
             if(active_context.is_async) {
                 asyncify_start_rewind(active_context.async_buf);
@@ -79,11 +81,16 @@ void context_init(asyncify_context *ctx, uthread_func_t f, void *arg) {
 }
 
 void context_switch(asyncify_context *from, asyncify_context to) {
+    // printf("Here 2\n");
+	// fflush(stdout);
     if(sleeping == 0) {
         sleeping = 1;
         *from = active_context;
         from->is_async = 1;
         next_context = to;
+        // printf("Here 3\n");
+        // fflush(stdout);
+
         asyncify_start_unwind(active_context.async_buf);
     } else { 
         asyncify_stop_rewind();

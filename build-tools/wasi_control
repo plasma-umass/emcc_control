@@ -1,14 +1,14 @@
 #!/bin/bash
 shopt -s expand_aliases
-source ~/.bash_aliases
-emsdk_setup > /dev/null
+source ~/.bashrc
+# emsdk_setup > /dev/null
 
 set -e
 
 out_arg=${@:$#} # last parameter 
 in_args=${*%${!#}} # all parameters except the last
 
-em++ $in_args -g -Os -o "$out_arg.wasm" -s NO_EXIT_RUNTIME=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0
+wasicc $in_args -g -Oz -o "$out_arg.wasm" --for-linker=--allow-undefined
 wasm2wat "$out_arg.wasm" -o "$out_arg"
-# rm "$out_arg.wasm"
+rm "$out_arg.wasm"
 sub_primitives.py "$out_arg"

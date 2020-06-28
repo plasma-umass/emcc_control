@@ -6,7 +6,7 @@
 int null_uthread_create(int *t, void *f, void *arg);
 void null_uthread_yield(void);
 int null_uthread_join(int t, int *retval);
-void null_uthread_init_main(void (*f)(void *), void *arg);
+void null_uthread_init(void (*f)(int, char **), int argc, char **argv);
 
 #if NEED_CONTEXT
 
@@ -30,7 +30,7 @@ typedef unsigned short uthread_t;
 
 typedef void (*uthread_func_t)(void *arg);
 
-void uthread_init_main(void (*f)(void *), void *arg);
+void uthread_init_main(void (*f)(int, char **), int argc, char **argv);
 
 /*
  * uthread_create - Create a new thread
@@ -101,7 +101,7 @@ int uthread_join(uthread_t tid, int *retval);
 #define uthread_create(t, f, x) pthread_create(t, NULL, f, x) 
 #define uthread_join(t, rv) pthread_join(t, NULL)
 #define uthread_yield() null_uthread_yield()
-#define uthread_init_main(f) null_uthread_init(f)
+#define uthread_init_main(f, x, y) null_uthread_init(f, x, y)
 
 #elif (CONTEXT_IMPL == NATIVE_SERIAL || CONTEXT_IMPL == WASMTIME_SERIAL)
 
@@ -109,7 +109,7 @@ int uthread_join(uthread_t tid, int *retval);
 #define uthread_create(t, f, x) f(x)
 #define uthread_join(t, rv) null_uthread_join(t, rv)
 #define uthread_yield() null_uthread_yield()
-#define uthread_init_main(f) null_uthread_init(f)
+#define uthread_init_main(f, x, y) null_uthread_init(f, x, y)
 
 #endif
 

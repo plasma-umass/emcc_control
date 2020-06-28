@@ -1,4 +1,4 @@
-#include <emscripten/emscripten.h>
+// #include <emscripten/emscripten.h>
 #include "../../../include/continuations.h"
 
 DEFINE_HANDLER(save_k_restore, k, after_capture, {
@@ -42,6 +42,6 @@ void context_initialize_lib() {
 // DONT_DELETE_MY_HANDLER(save_k_restore);
 // DONT_DELETE_MY_HANDLER(init_handler);
 
-void context_main(void (*f)(void*), void *arg) {
-	f(arg);
+void context_main(void (*f)(int, char**), int argc, char **argv) {
+	f(argc, argv);
 }

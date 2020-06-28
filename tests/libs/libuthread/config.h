@@ -1,6 +1,8 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
+// #define TIME_YIELD 1
+
 #define WASMTIME_CONTS 1
 #define WASMTIME_ASYNCIFY 2
 #define NATIVE_SWAPCONTEXT 3

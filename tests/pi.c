@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #define NUM_THREADS 16
-#define TERMS_PER_YIELD 1
+#define TERMS_PER_YIELD 1 //32768
 
 typedef struct {
     uint64_t from;
@@ -14,7 +14,7 @@ typedef struct {
     uthread_t tid;
 } TermsArg;
 
-double term(double kf, uint64_t ki) {
+__attribute__((noinline)) double term(double kf, uint64_t ki) {
     int64_t sign = 2 * -((int64_t)ki % 2 ) + 1;
     double res = 4 * sign / (2*kf + 1);;
 
@@ -49,8 +49,13 @@ uint64_t exp2_int(uint64_t x) {
 
 TermsArg threads[NUM_THREADS];
 
-void the_main(void *argv_ptr) {
-    char **argv = argv_ptr;
+void the_main(int argc, char **argv) {
+    // char **argv = argv_ptr;
+
+    if(argc != 2) {
+        printf("Expected 1 arg: log2(# terms)\n");
+        return;
+    }
 
     uint64_t NUM_TERMS = exp2_int(atoi(argv[1]));    
 
@@ -72,11 +77,6 @@ void the_main(void *argv_ptr) {
 }
 
 int main(int argc, char **argv) {
-
-    if(argc != 2) {
-        printf("Expected 1 arg: log2(# terms)\n");
-        return 1;
-    }
-
-    uthread_init_main(the_main, argv);
+    uthread_init_main(the_main, argc, argv);
+    return 0;
 }

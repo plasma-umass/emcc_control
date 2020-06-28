@@ -36,17 +36,19 @@ void __prim_prompt_end();
 // This is replaced with nop
 int __prim_inhibit_optimizer();
 
-uint64_t __shim_control(control_handler_fn f, uint64_t arg);
+// uint64_t __shim_control(control_handler_fn f, uint64_t arg);
 void __shim_restore(k_id k, uint64_t v);
 k_id __shim_continuation_copy(k_id k);
 void __shim_continuation_delete(k_id k);
 
 
-#define DONT_DELETE_MY_HANDLER(handler_name) \
-    void EMSCRIPTEN_KEEPALIVE __garbage_please_delete_me_##handler_name() { \
-        control_handler_fn fptr = __prim_inhibit_optimizer() ? handler_name : 0; \
-        fptr(0, 0); \
-    } \
+// #define DONT_DELETE_MY_HANDLER(handler_name) \
+//     void EMSCRIPTEN_KEEPALIVE __garbage_please_delete_me_##handler_name() { \
+//         control_handler_fn fptr = __prim_inhibit_optimizer() ? handler_name : 0; \
+//         fptr(0, 0); \
+//     } \
+
+#define DONT_DELETE_MY_HANDLER(handler_name)
 
 
 #if NO_C_STACK == 1
@@ -62,7 +64,7 @@ void __shim_continuation_delete(k_id k);
 #define continuation_copy(k) __shim_continuation_copy(k)
 #define continuation_delete(k) __shim_continuation_delete(k)
 
-#define DEFINE_HANDLER(name, k_name, arg_name, body) void name(k_id k_name, uint64_t arg_name) { __hook_control(k_name, arg_name); body } DONT_DELETE_MY_HANDLER(name);
+#define DEFINE_HANDLER(name, k_name, arg_name, body) void name(k_id k_name, uint64_t arg_name) { __hook_control(k_name); body } DONT_DELETE_MY_HANDLER(name);
 
 // void save_k_restore(k_id k, uint64_t after_capture) {
 // 	__hook_control(k, after_capture);
@@ -74,7 +76,7 @@ void __shim_continuation_delete(k_id k);
 #define prompt(x) __prim_prompt_begin(); x; __prim_prompt_end();
 
 void initialize_continuations();
-void __hook_control(k_id k, uint64_t arg);
+void __hook_control(k_id k);
 
 
 #ifdef __cplusplus

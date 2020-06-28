@@ -7,6 +7,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#if TIME_YIELD == 1
+#include <time.h>
+#endif
+
 #include "queue.h"
 #include "uthread.h"
 #include "context.h"
@@ -59,6 +63,15 @@ struct TCB *runningThread = NULL;
 queue_t blockedOrZombieQueue = NULL;
 uthread_t nextTID = 1;
 
+#if TIME_YIELD == 1
+struct timespec last_yield_spec;
+int yield_ns;
+
+int yield_count;
+int yield_every;
+#endif
+
+
 void _debug_print_state(const char *funcName) {
 	return;
 	if(runningThread == NULL) {
@@ -73,7 +86,7 @@ void _debug_print_state(const char *funcName) {
 }
 
 // Initialize the thread queues and set up the main thread
-void uthread_init_main(void (*f)(void*), void *arg) {
+void uthread_init_main(void (*f)(int, char **), int argc, char **argv) {
 	context_initialize_lib();
 
 	// Create the thread queues
@@ -84,13 +97,37 @@ void uthread_init_main(void (*f)(void*), void *arg) {
 	struct TCB *mainTCB = newTCB(0, Running);
 	runningThread = mainTCB;
 
+	#if TIME_YIELD == 1
+	clock_gettime(CLOCK_MONOTONIC, &last_yield_spec);
+
+	const char *s = getenv("YIELD_US");
+	// printf("YIELD_MS str = %s\n", s);
+	if(s == NULL) {
+		yield_ns = 0;
+	} else {
+		yield_ns = 1000 * atoi(s);
+	}
+
+	s = getenv("YIELD_EVERY");
+	// printf("YIELD_MS str = %s\n", s);
+	if(s == NULL) {
+		yield_every = 0;
+	} else {
+		yield_every = atoi(s);
+	}
+
+	yield_count = 1;
+	// printf("YIELD_MS = %d\n", yield_ms);
+
+	#endif
+
 	// Run the main function
 	// f(arg);
-	context_main(f, arg);
+	context_main(f, argc, argv);
 }
 
 // Running thread yields to another thread to execute
-void uthread_yield(void)
+static void uthread_yield_force(void)
 {
 	_debug_print_state(__func__);
 
@@ -121,8 +158,56 @@ void uthread_yield(void)
 	// preempt_enable();
 
 	// Perform context switch from running (now ready) thread to the new thread
+	// printf("Here 1?\n");
+	// fflush(stdout);
 	context_switch(&toMakeReady->context, toMakeRunning->context);
 }
+
+// https://gist.github.com/diabloneo/9619917
+void timespec_diff(struct timespec *start, struct timespec *stop,
+                   struct timespec *result)
+{
+    if ((stop->tv_nsec - start->tv_nsec) < 0) {
+        result->tv_sec = stop->tv_sec - start->tv_sec - 1;
+        result->tv_nsec = stop->tv_nsec - start->tv_nsec + 1000000000;
+    } else {
+        result->tv_sec = stop->tv_sec - start->tv_sec;
+        result->tv_nsec = stop->tv_nsec - start->tv_nsec;
+    }
+
+    return;
+}
+
+void uthread_yield(void) {
+	#if TIME_YIELD == 1
+		if(yield_every != 0) {
+			if(yield_count == yield_every) {
+				yield_count = 1;
+				uthread_yield_force();
+			} else {
+				yield_count++;
+			}
+		} else if(yield_ns != 0) {
+			
+			struct timespec current_spec;
+			clock_gettime(CLOCK_MONOTONIC, &current_spec);
+			struct timespec diff_spec;
+			timespec_diff(&last_yield_spec, &current_spec, &diff_spec);
+			int ns_diff = (1000 * 1000 * 1000 * (int)diff_spec.tv_sec) + ((int)diff_spec.tv_nsec);
+			// printf("diff = %d\n", ms_diff);
+			if(ns_diff > yield_ns) {
+				last_yield_spec = current_spec;
+				// printf("Yielding!\n");
+				uthread_yield_force();
+			}
+		} else {
+			uthread_yield_force();
+		}
+	#else
+		uthread_yield_force();
+	#endif
+}
+
 
 // Get TID of running thread
 uthread_t uthread_self(void)
@@ -336,8 +421,8 @@ int uthread_join(uthread_t tid, int *retval)
 
 #else
 
-void null_uthread_init_main(void (*f)(void*), void *arg);
-	f(arg);
+void null_uthread_init(void (*f)(int, char**), int argc, char **argv) {
+	f(argc, argv);
 }
 int null_uthread_create(int *t, void *f, void *arg) {
 	return 0;
