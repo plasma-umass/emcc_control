@@ -108,7 +108,8 @@ int uthread_join(uthread_t tid, int *retval);
 #define uthread_t int
 #define uthread_create(t, f, x) f(x)
 #define uthread_join(t, rv) null_uthread_join(t, rv)
-#define uthread_yield() null_uthread_yield()
+// #define uthread_yield() null_uthread_yield()
+#define uthread_yield() do{}while(0)
 #define uthread_init_main(f, x, y) null_uthread_init(f, x, y)
 
 #endif

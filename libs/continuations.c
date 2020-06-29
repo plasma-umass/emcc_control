@@ -27,7 +27,7 @@ char *current_stack_top;
 
 char *c_stacks_area = NULL;
 
-#define C_SMALL_STACK_SIZE 128 // 1024, 2^23, 8388608, 1048576
+#define C_SMALL_STACK_SIZE 1024 // 1024, 2^23, 8388608, 1048576
 #define C_SMALL_STACK_TABLE_SIZE 128
 
 uint64_t free_c_stack_id_list[C_SMALL_STACK_TABLE_SIZE];
