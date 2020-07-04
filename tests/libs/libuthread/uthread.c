@@ -439,6 +439,9 @@ int null_uthread_create(int *t, void *f, void *arg) {
 void null_uthread_yield(void) {
 	return;
 }
+uint64_t get_num_yields() {
+	return 0;
+}
 int null_uthread_join(int t, int *retval) {
 	return 0;
 }
