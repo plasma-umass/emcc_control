@@ -2,11 +2,14 @@
 #define _UTHREAD_H
 
 #include "config.h"
+#include <stdint.h>
 
 int null_uthread_create(int *t, void *f, void *arg);
 void null_uthread_yield(void);
 int null_uthread_join(int t, int *retval);
 void null_uthread_init(void (*f)(int, char **), int argc, char **argv);
+
+uint64_t get_num_yields(void);
 
 #if NEED_CONTEXT
 

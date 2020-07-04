@@ -126,10 +126,19 @@ void uthread_init_main(void (*f)(int, char **), int argc, char **argv) {
 	context_main(f, argc, argv);
 }
 
+
+static uint64_t num_yields = 0;
+
+uint64_t get_num_yields() {
+    return num_yields;
+}
+
 // Running thread yields to another thread to execute
 static void uthread_yield_force(void)
 {
 	_debug_print_state(__func__);
+
+    num_yields++;
 
 	struct TCB *toMakeReady = runningThread;
 	struct TCB *toMakeRunning;

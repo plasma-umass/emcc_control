@@ -10,10 +10,11 @@
 extern "C" {
 #endif
 
+#define ASYNCIFY_STACK_SIZE 16384
 
 uint32_t alloc_asyncify_buf() {
-    uint32_t stack = (uint32_t)malloc(1024);
-    uint32_t stack_end = stack + 1024 - 8;
+    uint32_t stack = (uint32_t)malloc(ASYNCIFY_STACK_SIZE);
+    uint32_t stack_end = stack + ASYNCIFY_STACK_SIZE - 8;
     uint32_t *buf = (uint32_t *)malloc(sizeof(uint32_t)*2);
     buf[0] = stack;
     buf[1] = stack_end;
